@@ -41,7 +41,7 @@ else:
         rhw = os.path.join(ssdir, 'surf', 'rh.white')
         annots = 'aparc.a2009s.annot'
         
-        cmd = f'freeview -v {st1} {a09}:colormpa=LUT:opacity=0.3 \
+        cmd = f'freeview -v {st1} -v {a09}:colormap=LUT:opacity=0.3 \
                 -f {lhp}:edgecolor=blue:annot={annots}:edgethickness=1 \
                 -f {rhp}:edgecolor=blue:annot={annots}:edgethickness=1 \
                 -f {lhw}:edgecolor=yellow:edgethickness=1 \
