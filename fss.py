@@ -14,6 +14,7 @@ parser.add_argument('-in', '--inflated', help = 'Show the inflated surface, no a
 parser.add_argument('-ho', '--holes', help = 'Dedicated mode for showing holes in the surface; no aseg just WM in yellow and Pial in Blue', action = 'store_true', required = False, default = False)
 parser.add_argument('-ap', '--aparc', help = 'Load default with aparc aseg', action = 'store_true', required = False, default = False)
 parser.add_argument('-ras', '--ras', help = 'Go to given RAS coordinate x y z', required = False, nargs=3, metavar=('x', 'y', 'z'), type = float)
+parser.add_argument('-bm', '--brainmask', help = 'Load brainmask.mgz instead of T1', required=False, default=False, action='store_true')
 args = parser.parse_args()
 
 sub = args.id
@@ -30,8 +31,10 @@ if os.path.exists(ssdir) == False:
         
 else:
     # Build the cmd
-    
-    st1 = os.path.join(ssdir, 'mri', 'orig.mgz')
+    if args.brainmask:
+        st1 = os.path.join(ssdir, 'mri', 'brainmask.mgz')
+    else:
+        st1 = os.path.join(ssdir, 'mri', 'orig.mgz')
 
     if args.aparc:
         a09 = os.path.join(ssdir, 'mri', 'aparc.a2009s+aseg.mgz')
