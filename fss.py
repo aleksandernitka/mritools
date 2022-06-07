@@ -12,32 +12,31 @@ parser.add_argument('-i', '--inflated', help = 'Show the inflated surface, no as
 parser.add_argument('-o', '--holes', help = 'Dedicated mode for showing holes in the surface; no aseg just WM in yellow and Pial in Blue', action = 'store_true', required = False, default = False)
 parser.add_argument('-a', '--aparc', help = 'Load default with aparc aseg', action = 'store_true', required = False, default = False)
 parser.add_argument('-r', '--ras', help = 'Go to given RAS coordinate x y z', required = False, nargs=3, metavar=('x', 'y', 'z'), type = float)
-parser.add_argument('-m', '--brainmask', help = 'Load brainmask.mgz instead of T1', required=False, default=False, action='store_true')
 parser.add_argument('-c', '--compare', help = 'Loads WM and Pial surfaces for both uncorrected (backup) and corrected data', required=False, default=False, action='store_true')
 args = parser.parse_args()
+parser.add_argument('-m', '--machine', help = 'Specify mechine, default is Kraken, kpc will set the paths accordingly', required=False, default='kraken')
 
 sub = args.id
 if 'sub-' not in sub:
     sub = 'sub-' + sub
 
-#fsdir = '/mnt/nasips/COST_mri/derivatives/freesurfer/'
-fsdir = '/Volumes/clab/COST_mri/derivatives/freesurfer/'
+if parser.machine == 'kpc':
+    mnt = '/mnt/clab/'
+elif args.machine == 'kraken':
+    mnt = '/mnt/nasips/'
+else:
+    print(f'Error: {parser.machine} is not recognised, please use kraken or kpc')
+    exit(1)
 
-if args.compare:
-    bcdir = ''
-    ssbck = join(bcdir, sub)
-
-ssdir = join(fsdir, sub)
+ssbck = join(mnt, 'aleksander', 'FreeSurfer_20220527', sub)
+ssdir = join(mnt, 'COST_mri', 'derivatives', 'freesurfer', sub)
     
 if exists(ssdir) == False:
     print(f'Error: {ssdir} does not exist!')
         
 else:
     # Build the cmd
-    if args.brainmask:
-        st1 = join(ssdir, 'mri', 'brainmask.mgz')
-    else:
-        st1 = join(ssdir, 'mri', 'orig.mgz')
+    st1 = join(ssdir, 'mri', 'brainmask.mgz')
 
     if args.aparc:
         a09 = join(ssdir, 'mri', 'aparc.a2009s+aseg.mgz')
