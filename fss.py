@@ -13,14 +13,15 @@ parser.add_argument('-o', '--holes', help = 'Dedicated mode for showing holes in
 parser.add_argument('-a', '--aparc', help = 'Load default with aparc aseg', action = 'store_true', required = False, default = False)
 parser.add_argument('-r', '--ras', help = 'Go to given RAS coordinate x y z', required = False, nargs=3, metavar=('x', 'y', 'z'), type = float)
 parser.add_argument('-c', '--compare', help = 'Loads WM and Pial surfaces for both uncorrected (backup) and corrected data', required=False, default=False, action='store_true')
+parser.add_argument('-m', '--machine', help = 'Specify mechine, default is kraken, kpc will set the paths accordingly', required=False, default='kraken')
+parser.add_argument('-l', '--linew', help = 'Specify line width for the Pial/WM plotting, default is 1', required=False, default=1)
 args = parser.parse_args()
-parser.add_argument('-m', '--machine', help = 'Specify mechine, default is Kraken, kpc will set the paths accordingly', required=False, default='kraken')
 
 sub = args.id
 if 'sub-' not in sub:
     sub = 'sub-' + sub
 
-if parser.machine == 'kpc':
+if args.machine == 'kpc':
     mnt = '/mnt/clab/'
 elif args.machine == 'kraken':
     mnt = '/mnt/nasips/'
@@ -47,10 +48,10 @@ else:
         annots = 'aparc.a2009s.annot'
         
         cmd = f'freeview -v {st1} -v {a09}:colormap=LUT:opacity=0.3 \
-                -f {lhp}:edgecolor=blue:annot={annots}:edgethickness=1 \
-                -f {rhp}:edgecolor=blue:annot={annots}:edgethickness=1 \
-                -f {lhw}:edgecolor=yellow:edgethickness=1 \
-                -f {rhw}:edgecolor=yellow:edgethickness=1'
+                -f {lhp}:edgecolor=blue:annot={annots}:edgethickness={args.linew} \
+                -f {rhp}:edgecolor=blue:annot={annots}:edgethickness={args.linew} \
+                -f {lhw}:edgecolor=yellow:edgethickness={args.linew} \
+                -f {rhw}:edgecolor=yellow:edgethickness={args.linew}'
 
 
     elif args.inflated:
@@ -68,10 +69,10 @@ else:
         rhw = join(ssdir, 'surf', 'rh.white')
         
         cmd = f'freeview -v {st1}:visible=0 \
-                -f {lhp}:edgecolor=blue:edgethickness=1:color=darkblue:curvature_method=off \
-                -f {rhp}:edgecolor=blue:edgethickness=1:color=darkblue:curvature_method=off \
-                -f {lhw}:edgecolor=yellow:edgethickness=1:color=yellow:curvature_method=off \
-                -f {rhw}:edgecolor=yellow:edgethickness=1:color=yellow:curvature_method=off -view left -viewport 3d'
+                -f {lhp}:edgecolor=blue:edgethickness={args.linew}:color=darkblue:curvature_method=off \
+                -f {rhp}:edgecolor=blue:edgethickness={args.linew}:color=darkblue:curvature_method=off \
+                -f {lhw}:edgecolor=yellow:edgethickness={args.linew}:color=yellow:curvature_method=off \
+                -f {rhw}:edgecolor=yellow:edgethickness={args.linew}:color=yellow:curvature_method=off -view left -viewport 3d'
 
     
     elif args.compare:
@@ -87,14 +88,14 @@ else:
         rhwO = join(ssbck, 'surf', 'rh.white')
 
         cmd = f'freeview -v {st1}:visible=1 \
-                -f {lhpN}:edgecolor=blue:edgethickness=1:color=darkblue:curvature_method=off:name=L_Pial_Corrected \
-                -f {rhpN}:edgecolor=blue:edgethickness=1:color=darkblue:curvature_method=off:name=R_Pial_Corrected \
-                -f {lhwN}:edgecolor=yellow:edgethickness=1:color=yellow:curvature_method=off:name=L_WM_Corrected \
-                -f {rhwN}:edgecolor=yellow:edgethickness=1:color=yellow:curvature_method=off:name=L_WM_Corrected \
-                -f {lhpO}:edgecolor=blue:edgethickness=1:color=blue:curvature_method=off:name=L_Pial_Old \
-                -f {rhpO}:edgecolor=blue:edgethickness=1:color=blue:curvature_method=off:name=R_Pial_Old \
-                -f {lhwO}:edgecolor=yellow:edgethickness=1:color=green:curvature_method=off:name=L_WM_Old \
-                -f {rhwO}:edgecolor=yellow:edgethickness=1:color=green:curvature_method=off:name=R_WM_Old'
+                -f {lhpN}:edgecolor=darkgreen:edgethickness={args.linew}:color=darkgreen:curvature_method=off:name=L_Pial_Corrected \
+                -f {rhpN}:edgecolor=darkgreen:edgethickness={args.linew}:color=darkgreen:curvature_method=off:name=R_Pial_Corrected \
+                -f {lhwN}:edgecolor=green:edgethickness={args.linew}:color=green:curvature_method=off:name=L_WM_Corrected \
+                -f {rhwN}:edgecolor=green:edgethickness={args.linew}:color=green:curvature_method=off:name=L_WM_Corrected \
+                -f {lhpO}:edgecolor=darkred:edgethickness={args.linew}:color=darkred:curvature_method=off:name=L_Pial_Old \
+                -f {rhpO}:edgecolor=darkred:edgethickness={args.linew}:color=darkred:curvature_method=off:name=R_Pial_Old \
+                -f {lhwO}:edgecolor=red:edgethickness={args.linew}:color=red:curvature_method=off:name=L_WM_Old \
+                -f {rhwO}:edgecolor=red:edgethickness={args.linew}:color=red:curvature_method=off:name=R_WM_Old'
 
     else:
         lhp = join(ssdir, 'surf', 'lh.pial')
@@ -103,10 +104,10 @@ else:
         rhw = join(ssdir, 'surf', 'rh.white')
         
         cmd = f'freeview -v {st1} \
-                -f {lhp}:edgecolor=blue:edgethickness=1:curvature_method=off:overlay=lh.thickness:overlay_threshold=0,2.5 \
-                -f {rhp}:edgecolor=blue:edgethickness=1:curvature_method=off:overlay=rh.thickness:overlay_threshold=0,2.5 \
-                -f {lhw}:edgecolor=yellow:edgethickness=1 \
-                -f {rhw}:edgecolor=yellow:edgethickness=1 -viewport coronal -layout 4'
+                -f {lhp}:edgecolor=blue:edgethickness={args.linew}:curvature_method=off \
+                -f {rhp}:edgecolor=blue:edgethickness={args.linew}:curvature_method=off \
+                -f {lhw}:edgecolor=yellow:edgethickness={args.linew} \
+                -f {rhw}:edgecolor=yellow:edgethickness={args.linew} -viewport coronal -layout 4'
 
     if args.ras:
         cmd = cmd + f' -ras {args.ras[0]} {args.ras[1]} {args.ras[2]}' 
