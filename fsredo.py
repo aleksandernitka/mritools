@@ -50,7 +50,6 @@ else:
             print(result.stdout)
             print(result.stderr)
 
-
 if args.parallel:
     if which('parallel') is None:
         print('GNU parallel is not installed. Please install it or run subjects in sequence.')
@@ -154,6 +153,11 @@ else:
     if args.telegram:       
         sp.run(f'python telegram.py -m "Running recon-all on {args.subjects[0]}"', shell=True)
 
+    # copy required files to the tmpDir
+    if not args.nocopyin:
+        sp.run(f'cp -r {join(args.subjectsDir, args.subjects[0])} {join(args.tmpDir, args.subjects[0])}', shell=True)
+
+    # add to the command
     cmd += f'-s {args.subjects[0]} '
     
     # RUN THE COOKED COMMAND
