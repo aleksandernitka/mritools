@@ -162,9 +162,7 @@ else:
     cmd += f'-s {args.subjects[0]} '
     
     # RUN THE COOKED COMMAND
-    sp.run(cmd, shell=True, stdout=sp.PIPE, stderr=sp.PIPE, text=True)
-    print(result.stdout)
-    print(result.stderr)
+    sp.run(cmd, shell=True)
     
     if not args.nocopyout:
         sp.run(f'cp -r {join(args.tmpDir, args.subjects[0])} {join(args.subjectsDir, args.subjects[0])}', shell=True)
