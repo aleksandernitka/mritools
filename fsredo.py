@@ -47,7 +47,7 @@ else:
         else:
             # TODO Test and adjust this --> if returns None, as in recon-all not found --> exit, else silent
             sp.run(f'singularity exec {args.container} which recon-all', shell=True, \
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                stdout=sp.PIPE, stderr=sp.PIPE, text=True)
             print(result.stdout)
             print(result.stderr)
 
@@ -134,7 +134,7 @@ if len(args.subjects) > 1:
                 sp.run(f'cp -r {join(args.subjectsDir, s)} {join(args.tmpDir, s)}', shell=True)
             
             # run the command
-            sp.run(f'', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            sp.run(f'', shell=True, stdout=sp.PIPE, stderr=sp.PIPE, text=True)
             print(result.stdout)
             print(result.stderr)
             
@@ -153,7 +153,7 @@ if len(args.subjects) > 1:
         
         # TODO
         # run the command
-        # sp.run(f'{cmd} {args.subjects}', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        # sp.run(f'{cmd} {args.subjects}', shell=True, stdout=sp.PIPE, stderr=sp.PIPE, text=True)
 else:
     # do a single subject
     if args.telegram:       
@@ -162,7 +162,7 @@ else:
     cmd += f'-s {args.subjects[0]} '
     
     # RUN THE COOKED COMMAND
-    sp.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    sp.run(cmd, shell=True, stdout=sp.PIPE, stderr=sp.PIPE, text=True)
     print(result.stdout)
     print(result.stderr)
     
