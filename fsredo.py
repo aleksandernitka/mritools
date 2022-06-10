@@ -23,7 +23,6 @@ args.add_argument('-no3T', help='Do not add the 3T flag to recon-all', required=
 args.add_argument('-noqcache', help='Do not add the -qcache flag to recon-all', required=False, default=False, action='store_true')
 args.add_argument('-c', '--container', help='Container path (Freesurfer, Singularity) if no path is set the script will \
     assume local installation of Freesurfer.', required=False, default=None, metavar='[path]')
-args.add_argument('-m', '--mail', help='Send mail to this address when done', required=False, default=False, metavar='[email]')
 args = args.parse_args()
 
 # Stop if you want to run both; singularity and parallel, unless I am mistaken this will fail TODO
@@ -107,10 +106,6 @@ if not args.noqcache:
 # debug mode
 if args.debug:
     cmd += '-debug '
-
-# mail
-if args.mail:
-    cmd += f'-m {args.mail} '
 
 #### EXECUTE THE COMMAND ####
 if len(args.subjects) > 1:
