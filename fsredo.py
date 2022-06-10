@@ -3,7 +3,7 @@
 
 import subprocess as sp
 import argparse
-from os.path import exists
+from os.path import exists, join
 from shutil import which
 
 args=argparse.ArgumentParser(description='This function helps with the reprocessing with recon-all.')
@@ -79,10 +79,10 @@ for s in args.subjects:
 # Set tmpDir as SUBJECTS_DIR
 cmd = f'recon-all -sd {args.tmpDir} '
 
-# Copy all the subjects to the tmpDir
-if not args.nocopyin:
+# Copy all the subjects to the tmpDir, but only if all are needed at once, that is in parallel mode
+if args.parallel is not None:
     for s in args.subjects:
-        sp.run(f'cp -r {args.subjectsDir} {args.tmpDir}', shell=True)
+        sp.run(f'cp -r {join(args.subjectsDir, s)} {join(args.tmpDir, s)}', shell=True)
 
 # Build the command, WM
 if args.ar2cp:
@@ -95,10 +95,6 @@ if args.arpial:
 # build the command, autorecon3
 if args.ar3:
     cmd += '-autorecon3 '
-
-# build the command, add subjects
-# TODO
-cmd += f'-s {args.subjects} '
 
 # build the command, add 3T flag
 if not args.no3T:
@@ -116,24 +112,68 @@ if args.debug:
 if args.mail:
     cmd += f'-m {args.mail} '
 
-print(cmd)
-
 #### EXECUTE THE COMMAND ####
+if len(args.subjects) > 1:
+    # Run multiple subjects, can be parallel or sequential
 
-# Send telegram
-# TODO
-if args.telegram:
-    # FIXME - the below is cool, but the telegram script is not adjusted yet
-    sp.run(f'python telegram.py -m "Running recon-all on {args.subjects}"', shell=True)
+    # do a loop if we have more than one subject
+    if not args.parallel:
 
-# run the commmand
-# TODO
+        if args.telegram:       
+            sp.run(f'python telegram.py -m "Running recon-all on {args.subjects} in sequence."', shell=True)
+        
+        for i, s in enumerate(args.subjects):
+            # add single sub to the command
+
+            # send mail if last subject
+            if i == len(args.subjects) - 1:
+                cmd += f'-m {args.mail} '
+
+            # copy required files to the tmpDir
+            if not args.nocopyin:
+                sp.run(f'cp -r {join(args.subjectsDir, s)} {join(args.tmpDir, s)}', shell=True)
+            
+            # run the command
+            sp.run(f'', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            print(result.stdout)
+            print(result.stderr)
+            
+            # copy the output to the subjectsDir
+            if not args.nocopyout:
+                sp.run(f'cp -r {join(args.tmpDir, s)} {join(args.subjectsDir, s)}', shell=True)
+            
+            # clean up the tmpDir
+            if not args.noclean:
+                sp.run(f'rm -rf {join(args.tmpDir, s)}', shell=True)
+
+    else:
+        # TODO RUN as parallel:
+        if args.telegram:       
+            sp.run(f'python telegram.py -m "Running recon-all on {args.subjects} in parallel on {args.parallel} threads."', shell=True)
+        
+        # TODO
+        # run the command
+        # sp.run(f'{cmd} {args.subjects}', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+else:
+    # do a single subject
+    if args.telegram:       
+        sp.run(f'python telegram.py -m "Running recon-all on {args.subjects[0]}"', shell=True)
+
+    cmd += f'-s {args.subjects[0]} '
+    
+    # RUN THE COOKED COMMAND
+    sp.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    print(result.stdout)
+    print(result.stderr)
+    
+    if not args.nocopyout:
+        sp.run(f'cp -r {join(args.tmpDir, args.subjects[0])} {join(args.subjectsDir, args.subjects[0])}', shell=True)
+    if not args.noclean:
+        sp.run(f'rm -rf {join(args.tmpDir, args.subjects[0])}', shell=True)
+    
+    
 
 # send telegram when done
-# TODO
 if args.telegram:
     # FIXME - the below is cool, but the telegram script is not adjusted yet
     sp.run(f'python telegram.py -m "Finished recon-all on {args.subjects}"', shell=True)
-
-# clean and move back if not noclean
-# TODO 
