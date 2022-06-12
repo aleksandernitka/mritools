@@ -15,23 +15,33 @@ parser.add_argument('-r', '--ras', help = 'Go to given RAS coordinate x y z', re
 parser.add_argument('-c', '--compare', help = 'Loads WM and Pial surfaces for both uncorrected (backup) and corrected data', required=False, default=False, action='store_true')
 parser.add_argument('-m', '--machine', help = 'Specify mechine, default is kraken, kpc will set the paths accordingly', required=False, default='kraken')
 parser.add_argument('-l', '--linew', help = 'Specify line width for the Pial/WM plotting, default is 1', required=False, default=1)
+parser.add_argument('-p', '--path', help = 'Specify full path the data folder, this will ignore the --machine flag', required=False, default=False)
+parser.add_argument('-b', '--backup', help = 'Specify the path for backup files, this is for the --comapre mode with --path specified', required = False, default = False)
 args = parser.parse_args()
 
 sub = args.id
 if 'sub-' not in sub:
     sub = 'sub-' + sub
 
-if args.machine == 'kpc':
-    mnt = '/mnt/clab/'
-elif args.machine == 'kraken':
-    mnt = '/mnt/nasips/'
-else:
-    print(f'Error: {parser.machine} is not recognised, please use kraken or kpc')
-    exit(1)
+if not args.path:
 
-ssbck = join(mnt, 'aleksander', 'FreeSurfer_20220527', sub)
-ssdir = join(mnt, 'COST_mri', 'derivatives', 'freesurfer', sub)
+    if args.machine == 'kpc':
+        mnt = '/mnt/clab/'
+    elif args.machine == 'kraken':
+        mnt = '/mnt/nasips/'
+    else:
+        print(f'Error: {parser.machine} is not recognised, please use kraken or kpc')
+        exit(1)
+
+    ssbck = join(mnt, 'aleksander', 'FreeSurfer_20220527', sub)
+    ssdir = join(mnt, 'COST_mri', 'derivatives', 'freesurfer', sub)
     
+else:
+    if args.backup:
+        ssbck = join(args.backup, sub)
+    else:    
+        ssbck = join(args.path, sub)
+    ssdir = join(args.path, sub)
 if exists(ssdir) == False:
     print(f'Error: {ssdir} does not exist!')
         
