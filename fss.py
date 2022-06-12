@@ -84,14 +84,14 @@ else:
 
         lhpO = join(ssbck, 'surf', 'lh.pial')
         rhpO = join(ssbck, 'surf', 'rh.pial')
-        lhwO = join(ssbck, 'surf', 'rh.white')
+        lhwO = join(ssbck, 'surf', 'lh.white')
         rhwO = join(ssbck, 'surf', 'rh.white')
 
         cmd = f'freeview -v {st1}:visible=1 \
                 -f {lhpN}:edgecolor=darkgreen:edgethickness={args.linew}:color=darkgreen:curvature_method=off:name=L_Pial_Corrected \
                 -f {rhpN}:edgecolor=darkgreen:edgethickness={args.linew}:color=darkgreen:curvature_method=off:name=R_Pial_Corrected \
                 -f {lhwN}:edgecolor=green:edgethickness={args.linew}:color=green:curvature_method=off:name=L_WM_Corrected \
-                -f {rhwN}:edgecolor=green:edgethickness={args.linew}:color=green:curvature_method=off:name=L_WM_Corrected \
+                -f {rhwN}:edgecolor=green:edgethickness={args.linew}:color=green:curvature_method=off:name=R_WM_Corrected \
                 -f {lhpO}:edgecolor=darkred:edgethickness={args.linew}:color=darkred:curvature_method=off:name=L_Pial_Old \
                 -f {rhpO}:edgecolor=darkred:edgethickness={args.linew}:color=darkred:curvature_method=off:name=R_Pial_Old \
                 -f {lhwO}:edgecolor=red:edgethickness={args.linew}:color=red:curvature_method=off:name=L_WM_Old \
