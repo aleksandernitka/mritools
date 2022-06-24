@@ -48,6 +48,7 @@ if exists(ssdir) == False:
 else:
     # Build the cmd
     st1 = join(ssdir, 'mri', 'brainmask.mgz')
+    wmm = join(ssdir, 'mri', 'wm.mgz')
 
     if args.aparc:
         a09 = join(ssdir, 'mri', 'aparc.a2009s+aseg.mgz')
@@ -57,7 +58,7 @@ else:
         rhw = join(ssdir, 'surf', 'rh.white')
         annots = 'aparc.a2009s.annot'
         
-        cmd = f'freeview -v {st1} -v {a09}:colormap=LUT:opacity=0.3 \
+        cmd = f'freeview -v {st1} -v {wmm}:colormap=heat:opacity=0.3 -v {a09}:colormap=LUT:opacity=0.3 \
                 -f {lhp}:edgecolor=blue:annot={annots}:edgethickness={args.linew} \
                 -f {rhp}:edgecolor=blue:annot={annots}:edgethickness={args.linew} \
                 -f {lhw}:edgecolor=yellow:edgethickness={args.linew} \
@@ -113,7 +114,7 @@ else:
         lhw = join(ssdir, 'surf', 'lh.white')
         rhw = join(ssdir, 'surf', 'rh.white')
         
-        cmd = f'freeview -v {st1} \
+        cmd = f'freeview -v {st1} -v {wmm}:colormap=heat:opacity=0.3\
                 -f {lhp}:edgecolor=blue:edgethickness={args.linew}:curvature_method=off \
                 -f {rhp}:edgecolor=blue:edgethickness={args.linew}:curvature_method=off \
                 -f {lhw}:edgecolor=yellow:edgethickness={args.linew} \
