@@ -37,30 +37,27 @@ if args.telegram:
         args.telegram = False
 
 ### Format the command
-cmd = f'recon-all -sd {args.subjectsDir} -s {" ".join(args.subjects)} '
+cmd1 = f'recon-all -sd {args.subjectsDir} -s'
 
-# Add subjects to run
-#cmd += f' '.join(args.subjects)
-#cmd += ' '
-
+cmd2 = ''
 # Build the command, WM
 if not args.noar2cp:
-    cmd += '-autorecon2-cp '
+    cmd2 += '-autorecon2-cp '
 
 # build the command, pial
 if not args.noarpial:
-    cmd += '-autorecon-pial '
+    cmd2 += '-autorecon-pial '
 
 # build the command, autorecon3
 if not args.noar3:
-    cmd += '-autorecon3 '
+    cmd2 += '-autorecon3 '
 
 # Add other flags
-cmd += '-3T -qcache '
+cmd2 += '-3T -qcache '
 
 # debug mode
 if args.debug:
-    cmd += '-debug '
+    cmd2 += '-debug '
 
 ### Run the command
 if args.parallel:
@@ -69,25 +66,26 @@ if args.parallel:
         print('GNU parallel is not installed. Please install it or run subjects in sequence.')
         exit(1)
     else:
-        print(f'GNU parallel is installed in {which("parallel")} Proceeding.')
+        # TODO not implemented correctly, needs to be fixed and run with | pipe
+        '''print(f'GNU parallel is installed in {which("parallel")} Proceeding.')
         # thanks to https://andysbrainbook.readthedocs.io/en/latest/FreeSurfer/FS_ShortCourse/FS_04_ReconAllParallel.html
         # ls *.nii | parallel --jobs 8 recon-all -s {.} -i {} -all -qcache
         cmd = f'parallel --jobs {args.parallel} ' + cmd
         
         print(f'Running {cmd}')
         
-        sp.run(cmd, shell=True)
+        sp.run(cmd, shell=True)'''
 
 else:
     ### ----> SEQUENTIAL
     if args.telegram:       
         sp.run(f'python telegram.py -m "Running recon-all on {args.subjects}"', shell=True)
-    
-    print(f'Running {cmd}')
 
     for i, s in enumerate(args.subjects):
         # run the command
-        sp.run(cmd, shell=True)
+        cmd = f'{cmd1} {s} {cmd2}' 
+        print(f'Running {i+1} from {len(args.subjects)} {s}')
+        #sp.run(cmd, shell=True)
 
 # send telegram when done
 if args.telegram:
