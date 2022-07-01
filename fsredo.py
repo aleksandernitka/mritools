@@ -83,7 +83,7 @@ if args.parallel:
         # ls *.nii | parallel --jobs 8 recon-all -s {.} -i {} -all -qcache
         cmd = f'cat subjects.txt | parallel --jobs {args.parallel} --progress ' 
         if args.tmux:
-            cmd =+ '--tmux '
+            cmd += '--tmux '
         cmd += f'{cmd1} {{}} {cmd2}'
         print(f'Running: {cmd}')
         sp.run(cmd, shell=True)
