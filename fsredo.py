@@ -5,7 +5,6 @@ import subprocess as sp
 import argparse
 from os.path import exists, join
 from shutil import which
-import numpy as np
 
 args=argparse.ArgumentParser(description='This function helps with the reprocessing with recon-all.')
 
@@ -67,14 +66,12 @@ if args.parallel:
         exit(1)
     else:
         # TODO not implemented correctly, needs to be fixed and run with | pipe
-        '''print(f'GNU parallel is installed in {which("parallel")} Proceeding.')
+        print(f'GNU parallel is installed in {which("parallel")} Proceeding.')
         # thanks to https://andysbrainbook.readthedocs.io/en/latest/FreeSurfer/FS_ShortCourse/FS_04_ReconAllParallel.html
         # ls *.nii | parallel --jobs 8 recon-all -s {.} -i {} -all -qcache
-        cmd = f'parallel --jobs {args.parallel} ' + cmd
-        
-        print(f'Running {cmd}')
-        
-        sp.run(cmd, shell=True)'''
+        cmd = f'{" ".join(args.subjects)} | parallel --jobs {args.parallel} {cmd1} {{}} {cmd2}'
+        print(f'Running: {cmd}')
+        sp.run(cmd, shell=True)
 
 else:
     ### ----> SEQUENTIAL
@@ -85,7 +82,7 @@ else:
         # run the command
         cmd = f'{cmd1} {s} {cmd2}' 
         print(f'Running {i+1} from {len(args.subjects)} {s}')
-        #sp.run(cmd, shell=True)
+        sp.run(cmd, shell=True)
 
 # send telegram when done
 if args.telegram:
