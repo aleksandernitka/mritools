@@ -17,6 +17,7 @@ args.add_argument('-np', '--noarpial', help='Do not run: pial surface fix, FreeS
 args.add_argument('-nw', '--noar2cp', help='Do not run: white surface fix, FreeSurfer\'s -autorecon2-cp flag', required=False, default=False, action='store_true')
 args.add_argument('-na', '--noar3', help='Do not run: autorecon3, FreeSurfer\'s -autorecon3 flag', required=False, default=False, action='store_true')
 args.add_argument('-debug', help='Debug mode, passes onto the freesurfer', required=False, default=False, action='store_true')
+args.add_argument('-tmux', '--tmux', help='Use tmux split for every job (gnu parallel option)', required=False, default=False, action='store_true')
 args = args.parse_args()
 
 ### Checks before the run
@@ -28,6 +29,18 @@ if not which('recon-all'):
 for s in args.subjects:
     if not s.startswith('sub-'):
         args.subjects[args.subjects.index(s)] = 'sub-' + s
+
+# check if number of threads is specified
+if args.parallel:
+    if not args.parallel.isdigit():
+        print('Parallel threads must be a number.')
+        exit(1)
+
+# for parallel processing, write all subjects to a file, then pipe with cat
+if args.parallel:
+    with open('subjects.txt', 'w') as f:
+        for s in args.subjects:
+            f.write(s + '\n')
 
 # Check for telegram module, if not found, do not send messages
 if args.telegram:
@@ -65,11 +78,13 @@ if args.parallel:
         print('GNU parallel is not installed. Please install it or run subjects in sequence.')
         exit(1)
     else:
-        # TODO not implemented correctly, needs to be fixed and run with | pipe
         print(f'GNU parallel is installed in {which("parallel")} Proceeding.')
         # thanks to https://andysbrainbook.readthedocs.io/en/latest/FreeSurfer/FS_ShortCourse/FS_04_ReconAllParallel.html
         # ls *.nii | parallel --jobs 8 recon-all -s {.} -i {} -all -qcache
-        cmd = f'{" ".join(args.subjects)} | parallel --jobs {args.parallel} {cmd1} {{}} {cmd2}'
+        cmd = f'cat subjects.txt | parallel --jobs {args.parallel} --progress ' 
+        if args.tmux:
+            cmd =+ '--tmux '
+        cmd += f'{cmd1} {{}} {cmd2}'
         print(f'Running: {cmd}')
         sp.run(cmd, shell=True)
 
