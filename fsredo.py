@@ -9,10 +9,10 @@ from shutil import which
 args=argparse.ArgumentParser(description='This function helps with the reprocessing with recon-all.')
 
 args.add_argument('subjectsDir', help='The directory where the subjects are stored. Remote drive is ok.', metavar='[path]')
+args.add_argument('tempDir', help='The directory where the temporary files are stored on the local machine', metavar='[path]')
 args.add_argument('-s', '--subjects', help='Subject ID', required=True, nargs='+')
 args.add_argument('-p', '--parallel', help='Use parallel processing, specify number of threads', required=False, default=None, metavar='[threads]')
 args.add_argument('-t', '--telegram', help='Send telegram messages', required=False, default=False, action='store_true')
-
 args.add_argument('-np', '--noarpial', help='Do not run: pial surface fix, FreeSurfer\'s -autorecon-pial flag', required=False, default=False, action='store_true')
 args.add_argument('-nw', '--noar2cp', help='Do not run: white surface fix, FreeSurfer\'s -autorecon2-cp flag', required=False, default=False, action='store_true')
 args.add_argument('-na', '--noar3', help='Do not run: autorecon3, FreeSurfer\'s -autorecon3 flag', required=False, default=False, action='store_true')
@@ -48,8 +48,14 @@ if args.telegram:
         print('Telegram module not found, messages will not be sent.')
         args.telegram = False
 
+# copy all folders to the temp directory
+# TODO - add arg no copyIn
+for s in args.subjects:
+    if not exists(join(args.tempDir, s)):
+        sp.run(f'cp -RL {join(subjectsDir + s)} {args.tempDir}', shell=True)
+
 ### Format the command
-cmd1 = f'recon-all -sd {args.subjectsDir} -s'
+cmd1 = f'recon-all -sd {args.tempDir} -s'
 
 cmd2 = ''
 # Build the command, WM
