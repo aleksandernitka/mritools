@@ -87,6 +87,7 @@ if args.parallel:
         print(f'GNU parallel is installed in {which("parallel")} Proceeding.')
         # thanks to https://andysbrainbook.readthedocs.io/en/latest/FreeSurfer/FS_ShortCourse/FS_04_ReconAllParallel.html
         # ls *.nii | parallel --jobs 8 recon-all -s {.} -i {} -all -qcache
+        sp.run(f'python telegram.py -m "Running recon-all on {args.subjects}"', shell=True)
         cmd = f'cat subjects.txt | parallel --jobs {args.parallel} --progress ' 
         if args.tmux:
             cmd += '--tmux '
