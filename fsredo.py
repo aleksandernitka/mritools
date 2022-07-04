@@ -52,7 +52,7 @@ if args.telegram:
 # TODO - add arg no copyIn
 for s in args.subjects:
     if not exists(join(args.tempDir, s)):
-        sp.run(f'cp -RL {join(subjectsDir + s)} {args.tempDir}', shell=True)
+        sp.run(f'cp -RL {join(args.subjectsDir, s)} {args.tempDir}', shell=True)
 
 ### Format the command
 cmd1 = f'recon-all -sd {args.tempDir} -s'
