@@ -48,6 +48,7 @@ if exists(ssdir) == False:
 else:
     # Build the cmd
     st1 = join(ssdir, 'mri', 'brainmask.mgz')
+    st2 = join(ssdir, 'mri', 'orig', '001.mgz')
     wmm = join(ssdir, 'mri', 'wm.mgz')
 
     if args.aparc:
@@ -114,7 +115,7 @@ else:
         lhw = join(ssdir, 'surf', 'lh.white')
         rhw = join(ssdir, 'surf', 'rh.white')
         
-        cmd = f'freeview -v {st1} -v {wmm}:colormap=heat:opacity=0.8:heatscale=1,110 \
+        cmd = f'freeview -v {st1} -v {st2}:opacity=0.3:visible=0 -v {wmm}:colormap=heat:opacity=0.8:heatscale=1,110 \
                 -f {lhp}:edgecolor=blue:edgethickness={args.linew}:curvature_method=off \
                 -f {rhp}:edgecolor=blue:edgethickness={args.linew}:curvature_method=off \
                 -f {lhw}:edgecolor=yellow:edgethickness={args.linew} \
