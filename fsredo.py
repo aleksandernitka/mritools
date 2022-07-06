@@ -12,9 +12,9 @@ args=argparse.ArgumentParser(description='This function helps with the reprocess
 
 args.add_argument('tempDir', help='The directory where the temporary files are stored on the local machine', metavar='[path]')
 args.add_argument('-sd', '--subjectsDir', help='The directory where the subjects are stored. Remote drive is ok.', metavar='[path]', \
-    default='\mnt\clab\COST_mri\derivatives\freesurfer', required=False)
+    default='/mnt/clab/COST_mri/derivatives/freesurfer', required=False)
 args.add_argument('-bd', '--backupDir', help='The directory where the backup files are stored. Remote drive is ok.', metavar='[path]', \
-    default='\mnt\clab\COST_mri\derivatives\qa\fs', required=False)
+    default='/mnt/clab/COST_mri/derivatives/qa/fs', required=False)
 args.add_argument('-s', '--subjects', help='Subject ID', required=True, nargs='+')
 args.add_argument('-p', '--parallel', help='Use parallel processing, specify number of threads', required=False, default=None, metavar='[threads]')
 args.add_argument('-t', '--telegram', help='Send telegram messages', required=False, default=False, action='store_true')
@@ -55,10 +55,10 @@ if args.telegram:
 
 # copy all folders to the temp directory
 # TODO - add arg no copyIn
-'''for s in args.subjects:
+for s in args.subjects:
     if not exists(join(args.tempDir, s)):
         sp.run(f'cp -RL {join(args.subjectsDir + s)} {args.tempDir}', shell=True)
-'''
+
 # zip backup
 def backup(subject, subdir=args.subjectsDir, bckdir=args.backupDir):
     from datetime import datetime
