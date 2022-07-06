@@ -57,9 +57,6 @@ if args.telegram:
 # TODO - add arg no copyIn
 '''for s in args.subjects:
     if not exists(join(args.tempDir, s)):
-<<<<<<< HEAD
-        sp.run(f'cp -RL {join(args.subjectsDir, s)} {args.tempDir}', shell=True)
-=======
         sp.run(f'cp -RL {join(args.subjectsDir + s)} {args.tempDir}', shell=True)
 '''
 # zip backup
@@ -76,9 +73,6 @@ def backup(subject, subdir=args.subjectsDir, bckdir=args.backupDir):
     tar = tarfile.open(zfile, mode="w:gz")
     tar.add(d2zip)
     tar.close()
-
-
->>>>>>> 6c87a0e40a6e6f2d733af0f107cf40ad32e161e6
 
 ### Format the command
 cmd1 = f'recon-all -sd {args.tempDir} -s'
