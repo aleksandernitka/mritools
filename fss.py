@@ -9,7 +9,6 @@ parser = argparse.ArgumentParser(description = 'This is a script to help with pl
 
 parser.add_argument('id', help = 'Subject id, must be specified as first argument')
 parser.add_argument('-i', '--inflated', help = 'Show the inflated surface, no aseg, just pial surface', action = 'store_true', required = False, default = False)
-parser.add_argument('-o', '--holes', help = 'Dedicated mode for showing holes in the surface; no aseg just WM in yellow and Pial in Blue', action = 'store_true', required = False, default = False)
 parser.add_argument('-a', '--aparc', help = 'Load default with aparc aseg', action = 'store_true', required = False, default = False)
 parser.add_argument('-r', '--ras', help = 'Go to given RAS coordinate x y z', required = False, nargs=3, metavar=('x', 'y', 'z'), type = float)
 parser.add_argument('-c', '--compare', help = 'Loads WM and Pial surfaces for both uncorrected (backup) and corrected data', required=False, default=False, action='store_true')
@@ -48,7 +47,7 @@ if exists(ssdir) == False:
 else:
     # Build the cmd
     st1 = join(ssdir, 'mri', 'brainmask.mgz')
-    st2 = join(ssdir, 'mri', 'orig', '001.mgz')
+    st2 = join(ssdir, 'mri', 'orig.mgz')
     wmm = join(ssdir, 'mri', 'wm.mgz')
 
     if args.aparc:
@@ -72,21 +71,6 @@ else:
         cmd = f'freeview -f {lhp}:overlay=lh.thickness:visible=1:overlay_threshold=0,5\
                 -f {rhp}:overlay=rh.thickness:visible=1:overlay_threshold=0,5 -layout 1 -view lateral -viewport 3d'
 
-
-    elif args.holes:
-
-        lhp = join(ssdir, 'surf', 'lh.pial')
-        rhp = join(ssdir, 'surf', 'rh.pial')
-        lhw = join(ssdir, 'surf', 'lh.white')
-        rhw = join(ssdir, 'surf', 'rh.white')
-        
-        cmd = f'freeview -v {st1}:visible=0 \
-                -f {lhp}:edgecolor=blue:edgethickness={args.linew}:color=darkblue:curvature_method=off \
-                -f {rhp}:edgecolor=blue:edgethickness={args.linew}:color=darkblue:curvature_method=off \
-                -f {lhw}:edgecolor=yellow:edgethickness={args.linew}:color=yellow:curvature_method=off \
-                -f {rhw}:edgecolor=yellow:edgethickness={args.linew}:color=yellow:curvature_method=off -view left -viewport 3d'
-
-    
     elif args.compare:
         # This assumes that NEW is the fixed volume and OLD is in backup folder
         lhpN = join(ssdir, 'surf', 'lh.pial')
