@@ -57,7 +57,7 @@ if args.telegram:
 # TODO - add arg no copyIn
 for s in args.subjects:
     if not exists(join(args.tempDir, s)):
-        sp.run(f'cp -RL {join(args.subjectsDir + s)} {args.tempDir}', shell=True)
+        sp.run(f'cp -RL {join(args.subjectsDir, s)} {args.tempDir}', shell=True)
 
 # zip backup
 def backup(subject, subdir=args.subjectsDir, bckdir=args.backupDir):
@@ -125,7 +125,7 @@ if args.parallel:
             # move new data
             sp.run(f'cp -RL {join(args.tempDir, s)} {args.subjectsDir}', shell=True)
             # remove temp data
-            sp.run(f'rm -rf {join(args.tempDir, s)}', shell=True)
+            #sp.run(f'rm -rf {join(args.tempDir, s)}', shell=True)
 
 
 else:
