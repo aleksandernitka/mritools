@@ -6,10 +6,15 @@ import argparse
 from os.path import exists, join
 from shutil import which
 
+
 args=argparse.ArgumentParser(description='This function helps with the reprocessing with recon-all.')
 
-args.add_argument('subjectsDir', help='The directory where the subjects are stored. Remote drive is ok.', metavar='[path]')
+
 args.add_argument('tempDir', help='The directory where the temporary files are stored on the local machine', metavar='[path]')
+args.add_argument('-sd', '--subjectsDir', help='The directory where the subjects are stored. Remote drive is ok.', metavar='[path]', \
+    default='\mnt\clab\COST_mri\derivatives\freesurfer', required=False)
+args.add_argument('-bd', '--backupDir', help='The directory where the backup files are stored. Remote drive is ok.', metavar='[path]', \
+    default='\mnt\clab\COST_mri\derivatives\qa\fs', required=False)
 args.add_argument('-s', '--subjects', help='Subject ID', required=True, nargs='+')
 args.add_argument('-p', '--parallel', help='Use parallel processing, specify number of threads', required=False, default=None, metavar='[threads]')
 args.add_argument('-t', '--telegram', help='Send telegram messages', required=False, default=False, action='store_true')
@@ -50,9 +55,30 @@ if args.telegram:
 
 # copy all folders to the temp directory
 # TODO - add arg no copyIn
-for s in args.subjects:
+'''for s in args.subjects:
     if not exists(join(args.tempDir, s)):
+<<<<<<< HEAD
         sp.run(f'cp -RL {join(args.subjectsDir, s)} {args.tempDir}', shell=True)
+=======
+        sp.run(f'cp -RL {join(args.subjectsDir + s)} {args.tempDir}', shell=True)
+'''
+# zip backup
+def backup(subject, subdir=args.subjectsDir, bckdir=args.backupDir):
+    from datetime import datetime
+    from os.path import join
+    import tarfile
+    dt = datetime.now()
+    x=dt.strftime("%Y%m%d%H%M%S")
+    d2zip = join(subdir, subject)
+    zfile = join(bckdir, f'{subject}_{x}.tar.gz')
+
+    print(f'Compressing and moving {subject} data to {zfile}')
+    tar = tarfile.open(zfile, mode="w:gz")
+    tar.add(d2zip)
+    tar.close()
+
+
+>>>>>>> 6c87a0e40a6e6f2d733af0f107cf40ad32e161e6
 
 ### Format the command
 cmd1 = f'recon-all -sd {args.tempDir} -s'
@@ -94,6 +120,19 @@ if args.parallel:
         cmd += f'{cmd1} {{}} {cmd2}'
         print(f'Running: {cmd}')
         sp.run(cmd, shell=True)
+
+        # backup the data before moving.
+        # then remove old (backedup) and overwrite with new
+        for s in args.subjects:
+            # backup old data tag.gz
+            backup(s, args.subjectsDir, args.backupDir)
+            # remove old data
+            sp.run(f'rm -rf {join(args.subjectsDir, s)}', shell=True)
+            # move new data
+            sp.run(f'cp -RL {join(args.tempDir, s)} {args.subjectsDir}', shell=True)
+            # remove temp data
+            sp.run(f'rm -rf {join(args.tempDir, s)}', shell=True)
+
 
 else:
     ### ----> SEQUENTIAL
