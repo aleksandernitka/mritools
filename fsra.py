@@ -61,11 +61,34 @@ except Exception as e:
     exit(1)
     
 # rm old on nasips
-sp.run(f'rm -rf {join(args.subjectsDir, args.sub)}', shell=True)
+try:
+    sp.run(f'rm -rf {join(args.subjectsDir, args.sub)}', shell=True)
+except Exception as e:
+    if args.telegram:
+        sp.run(f'python telegram.py -m "Error recon-all for {args.sub} {args.fix}: could not remove old files from nasips: {e}"', shell=True)
+    print(e)
+    print('Something went wrong with the remove old files command.')
+    exit(1)
+
 # cp to nasips
-sp.run(f'cp -RL {join(args.tmpDir, args.sub)} {args.subjectsDir}', shell=True)
+try:
+    sp.run(f'cp -RL {join(args.tmpDir, args.sub)} {args.subjectsDir}', shell=True)
+except Exception as e:
+    if args.telegram:
+        sp.run(f'python telegram.py -m "Error recon-all for {args.sub} {args.fix}: could not copy files to nasips: {e}"', shell=True)
+    print(e)
+    print('Something went wrong with the copy to nasips command.')
+    exit(1)
+
 # rm local
-sp.join(f'rm -rf {join(args.tmpDir, args.sub)}', shell=True)
+try:
+    sp.join(f'rm -rf {join(args.tmpDir, args.sub)}', shell=True)
+except Exception as e:
+    if args.telegram:
+        sp.run(f'python telegram.py -m "Error recon-all for {args.sub} {args.fix}: could not remove local files: {e}"', shell=True)
+    print(e)
+    print('Something went wrong with the remove local files command.')
+    exit(1)
 
 # send telegram message
 if args.telegram:
