@@ -11,7 +11,7 @@ args.add_argument('fix', help='The fix to run; either cp, wm or gm', required=Tr
 args.add_argument('-sd', '--subjectsDir', help='The directory where the subjects are stored. Remote drive is ok.', metavar='[path]',\
     default='/mnt/clab/COST_mri/derivatives/freesurfer', required=False)
 args.add_argument('-td', '--tmpdir', help='The directory where the temporary files are stored on the local machine', metavar='[path]',\
-    default='tmp/', required=False)')
+    default='tmp/', required=False)
 args.add_argument('-bd', '--backupDir', help='The directory where the backup files are stored. Remote drive is ok.', metavar='[path]',\
     default='/mnt/clab/COST_mri/derivatives/qa/fs', required=False)
 args.add_argument('-t', '--telegram', help='Send telegram messages', required=False, default=True, action='store_true')
