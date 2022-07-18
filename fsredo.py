@@ -18,8 +18,9 @@ args.add_argument('-bd', '--backupDir', help='The directory where the backup fil
 args.add_argument('-s', '--subjects', help='Subject ID', required=True, nargs='+')
 args.add_argument('-p', '--parallel', help='Use parallel processing, specify number of threads', required=False, default=None, metavar='[threads]')
 args.add_argument('-t', '--telegram', help='Send telegram messages', required=False, default=False, action='store_true')
+args.add_argument('-cp', '--controlpoints', help='If control points were added this flag must be set.', required=False, default=False, action='store_true')
 args.add_argument('-np', '--noarpial', help='Do not run: pial surface fix, FreeSurfer\'s -autorecon-pial flag', required=False, default=False, action='store_true')
-args.add_argument('-nw', '--noar2cp', help='Do not run: white surface fix, FreeSurfer\'s -autorecon2-cp flag', required=False, default=False, action='store_true')
+args.add_argument('-nw', '--noar2wm', help='Do not run: white surface fix, FreeSurfer\'s -autorecon2-cp flag', required=False, default=False, action='store_true')
 args.add_argument('-na', '--noar3', help='Do not run: autorecon3, FreeSurfer\'s -autorecon3 flag', required=False, default=False, action='store_true')
 args.add_argument('-debug', help='Debug mode, passes onto the freesurfer', required=False, default=False, action='store_true')
 args.add_argument('-tmux', '--tmux', help='Use tmux split for every job (gnu parallel option)', required=False, default=False, action='store_true')
@@ -79,7 +80,10 @@ cmd1 = f'recon-all -sd {args.tempDir} -s'
 
 cmd2 = ''
 # Build the command, WM
-if not args.noar2cp:
+if not args.noar2wm:
+    cmd2 += '-autorecon2-wm '
+
+if args.controlpoints:
     cmd2 += '-autorecon2-cp '
 
 # build the command, pial
