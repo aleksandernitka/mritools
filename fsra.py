@@ -6,8 +6,8 @@ import tarfile
 
 # TODO - expect one argument, the subject ID and fix
 args=argparse.ArgumentParser(description='This function helps with the reprocessing with recon-all.')
-args.add_argument('sub', help='The subject ID', required=True)
-args.add_argument('fix', help='The fix to run; either cp, wm or gm', required=True, choices=['cp', 'wm', 'gm'])
+args.add_argument('sub', help='The subject ID')
+args.add_argument('fix', help='The fix to run; either cp, wm or gm', choices=['cp', 'wm', 'gm'])
 args.add_argument('-sd', '--subjectsDir', help='The directory where the subjects are stored. Remote drive is ok.', metavar='[path]',\
     default='/mnt/clab/COST_mri/derivatives/freesurfer', required=False)
 args.add_argument('-td', '--tmpdir', help='The directory where the temporary files are stored on the local machine', metavar='[path]',\
@@ -15,6 +15,8 @@ args.add_argument('-td', '--tmpdir', help='The directory where the temporary fil
 args.add_argument('-bd', '--backupDir', help='The directory where the backup files are stored. Remote drive is ok.', metavar='[path]',\
     default='/mnt/clab/COST_mri/derivatives/qa/fs', required=False)
 args.add_argument('-t', '--telegram', help='Send telegram messages', required=False, default=True, action='store_true')
+args = args.parse_args()
+
 
 for s in args.sub:
     if not s.startswith('sub-'):
