@@ -29,8 +29,8 @@ if not exists('telegram.py'):
 try:
     sp.run(f'cp -RL {join(args.subjectsDir, args.sub)} {args.tmpdir}', shell=True)
     # backup the subject data on nasips
-    d2zip = join(tmp, args.sub)
-    zfile = join(bckdir, f'{args.sub}_{dt.now().strftime("%Y%m%d%H%M%S")}_{args.fix}.tar.gz')
+    d2zip = join(args.tmpdir, args.sub)
+    zfile = join(args.backupDir, f'{args.sub}_{dt.now().strftime("%Y%m%d%H%M%S")}_{args.fix}.tar.gz')
     print(f'Compressing and moving {args.sub} data to {zfile}')
     tar = tarfile.open(zfile, mode="w:gz")
     tar.add(d2zip)
