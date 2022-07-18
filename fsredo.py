@@ -6,9 +6,7 @@ import argparse
 from os.path import exists, join
 from shutil import which
 
-
 args=argparse.ArgumentParser(description='This function helps with the reprocessing with recon-all.')
-
 
 args.add_argument('tempDir', help='The directory where the temporary files are stored on the local machine', metavar='[path]')
 args.add_argument('-sd', '--subjectsDir', help='The directory where the subjects are stored. Remote drive is ok.', metavar='[path]', \
