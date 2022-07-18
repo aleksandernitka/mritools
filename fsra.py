@@ -1,7 +1,7 @@
 import argparse
 import subprocess as sp
 from datetime import datetime as dt
-from os.path import join
+from os.path import join, exists
 import tarfile
 
 # TODO - expect one argument, the subject ID and fix
@@ -18,9 +18,8 @@ args.add_argument('-t', '--telegram', help='Send telegram messages', required=Fa
 args = args.parse_args()
 
 
-for s in args.sub:
-    if not s.startswith('sub-'):
-        args.sub[args.sub.index(s)] = 'sub'
+if not args.sub.startswith('sub-'):
+        args.sub = f'sub-{args.sub}'
 
 if not exists('telegram.py'):
     print('Telegram module not found, messages will not be sent.')
@@ -28,11 +27,11 @@ if not exists('telegram.py'):
 
 # cp to local
 try:
-    print(f'Compressing and moving {args.sub} data to {zfile}')
-    sp.run(f'cp -RL {join(args.subjectsDir, args.sub)} {args.tempDir}', shell=True)
+    sp.run(f'cp -RL {join(args.subjectsDir, args.sub)} {args.tmpdir}', shell=True)
     # backup the subject data on nasips
     d2zip = join(tmp, args.sub)
     zfile = join(bckdir, f'{args.sub}_{dt.now().strftime("%Y%m%d%H%M%S")}_{args.fix}.tar.gz')
+    print(f'Compressing and moving {args.sub} data to {zfile}')
     tar = tarfile.open(zfile, mode="w:gz")
     tar.add(d2zip)
     tar.close()
@@ -50,11 +49,11 @@ if args.telegram:
 # run recon-all
 try:
     if args.fix == 'cp':
-        sp.run(f'recon-all -subjid {args.sub} -sd {args.tmpDir} -autorecon2-cp -autorecon3', shell=True)
+        sp.run(f'recon-all -subjid {args.sub} -sd {args.tmpdir} -autorecon2-cp -autorecon3', shell=True)
     elif args.fix == 'wm':
-        sp.run(f'recon-all -subjid {args.sub} -sd {args.tmpDir} -autorecon2-wm -autorecon3', shell=True)
+        sp.run(f'recon-all -subjid {args.sub} -sd {args.tmpdir} -autorecon2-wm -autorecon3', shell=True)
     elif args.fix == 'gm':
-        sp.run(f'recon-all -subjid {args.sub} -sd {args.tmpDir} -autorecon-pial', shell=True)
+        sp.run(f'recon-all -subjid {args.sub} -sd {args.tmpdir} -autorecon-pial', shell=True)
 except Exception as e:
     if args.telegram:
         sp.run(f'python telegram.py -m "Error recon-all for {args.sub} {args.fix}: recon all failed: {e}"', shell=True)
@@ -74,7 +73,7 @@ except Exception as e:
 
 # cp to nasips
 try:
-    sp.run(f'cp -RL {join(args.tmpDir, args.sub)} {args.subjectsDir}', shell=True)
+    sp.run(f'cp -RL {join(args.tmpdir, args.sub)} {args.subjectsDir}', shell=True)
 except Exception as e:
     if args.telegram:
         sp.run(f'python telegram.py -m "Error recon-all for {args.sub} {args.fix}: could not copy files to nasips: {e}"', shell=True)
@@ -84,7 +83,7 @@ except Exception as e:
 
 # rm local
 try:
-    sp.join(f'rm -rf {join(args.tmpDir, args.sub)}', shell=True)
+    sp.join(f'rm -rf {join(args.tmpdir, args.sub)}', shell=True)
 except Exception as e:
     if args.telegram:
         sp.run(f'python telegram.py -m "Error recon-all for {args.sub} {args.fix}: could not remove local files: {e}"', shell=True)
