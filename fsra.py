@@ -44,7 +44,7 @@ except Exception as e:
     exit(1)
 
 if args.telegram:
-    sp.run(f'python telegram.py -m "Done recon-all for {args.sub} {args.fix}"', shell=True)
+    sp.run(f'python telegram.py -m "Started recon-all for {args.sub} {args.fix}"', shell=True)
 
 # run recon-all
 try:
@@ -83,7 +83,7 @@ except Exception as e:
 
 # rm local
 try:
-    sp.join(f'rm -rf {join(args.tmpdir, args.sub)}', shell=True)
+    sp.run(f'rm -rf {join(args.tmpdir, args.sub)}', shell=True)
 except Exception as e:
     if args.telegram:
         sp.run(f'python telegram.py -m "Error recon-all for {args.sub} {args.fix}: could not remove local files: {e}"', shell=True)
