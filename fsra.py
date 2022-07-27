@@ -37,14 +37,13 @@ try:
     tar.close()
 except Exception as e:
     if args.telegram:
-        sp.run(f'python telegram.py -m "Error recon-all for {args.sub} {args.fix}: could not copy or compress files for \
-            backup: {e}"', shell=True)
+        sp.run(f'python telegram.py -m "Error recon-all for {args.sub} {args.fix}: could not copy or compress files for backup: {e}"', shell=True)
     print(e)
     print('Something went wrong with the copy to local or tar compression.')
     exit(1)
 
-if args.telegram:
-    sp.run(f'python telegram.py -m "Started recon-all for {args.sub} {args.fix}"', shell=True)
+#if args.telegram:
+    #sp.run(f'python telegram.py -m "Started recon-all for {args.sub} {args.fix}"', shell=True)
 
 # run recon-all
 try:
