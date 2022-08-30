@@ -54,8 +54,8 @@ try:
     elif args.fix == 'gm':
         sp.run(f'recon-all -subjid {args.sub} -sd {args.tmpdir} -autorecon-pial', shell=True)
     elif args.fix == 'wgm':
-        sp.run(f'recon-all -subjif {args.sub) -sd {args.tmpdir} -autorecon2-wm -autorecon3', shell=True)
-        sp.run(f'recon-all -subjif {args.sub) -sd {args.tmpdir} -autorecon-pial', shell=True)
+        sp.run(f'recon-all -subjif {args.sub} -sd {args.tmpdir} -autorecon2-wm -autorecon3', shell=True)
+        sp.run(f'recon-all -subjif {args.sub} -sd {args.tmpdir} -autorecon-pial', shell=True)
 except Exception as e:
     if args.telegram:
         sp.run(f'python telegram.py -m "Error recon-all for {args.sub} {args.fix}: recon all failed: {e}"', shell=True)
