@@ -7,7 +7,7 @@ import tarfile
 # TODO - expect one argument, the subject ID and fix
 args=argparse.ArgumentParser(description='This function helps with the reprocessing with recon-all.')
 args.add_argument('sub', help='The subject ID')
-args.add_argument('fix', help='The fix to run; either cp, wm or gm', choices=['cp', 'wm', 'gm'])
+args.add_argument('fix', help='The fix to run; either cp, wm, gm or wgm (white then gray matter)', choices=['cp', 'wm', 'gm', 'wgm'])
 args.add_argument('-sd', '--subjectsDir', help='The directory where the subjects are stored. Remote drive is ok.', metavar='[path]',\
     default='/mnt/clab/COST_mri/derivatives/freesurfer', required=False)
 args.add_argument('-td', '--tmpdir', help='The directory where the temporary files are stored on the local machine', metavar='[path]',\
@@ -53,6 +53,9 @@ try:
         sp.run(f'recon-all -subjid {args.sub} -sd {args.tmpdir} -autorecon2-wm -autorecon3', shell=True)
     elif args.fix == 'gm':
         sp.run(f'recon-all -subjid {args.sub} -sd {args.tmpdir} -autorecon-pial', shell=True)
+    elif args.fix == 'wgm':
+        sp.run(f'recon-all -subjif {args.sub) -sd {args.tmpdir} -autorecon2-wm -autorecon3', shell=True)
+        sp.run(f'recon-all -subjif {args.sub) -sd {args.tmpdir} -autorecon-pial', shell=True)
 except Exception as e:
     if args.telegram:
         sp.run(f'python telegram.py -m "Error recon-all for {args.sub} {args.fix}: recon all failed: {e}"', shell=True)
