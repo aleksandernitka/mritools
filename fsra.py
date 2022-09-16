@@ -3,11 +3,12 @@ import subprocess as sp
 from datetime import datetime as dt
 from os.path import join, exists
 import tarfile
+import time
 
-# TODO - expect one argument, the subject ID and fix
 args=argparse.ArgumentParser(description='This function helps with the reprocessing with recon-all.')
 args.add_argument('sub', help='The subject ID')
-args.add_argument('fix', help='The fix to run; either cp, wm, gm or wgm (white then gray matter)', choices=['cp', 'wm', 'gm', 'wgm'])
+args.add_argument('-f', 'fix', help='The fix to run; either cp, wm, gm or wgm (white then gray matter)', choices=['cp', 'wm', 'gm', 'wgm'], default='wgm')
+args.add_argument('-w', 'wait', help='wait for X minutes before starting this job', type=int, default=0, metavar='minutes')
 args.add_argument('-sd', '--subjectsDir', help='The directory where the subjects are stored. Remote drive is ok.', metavar='[path]',\
     default='/mnt/clab/COST_mri/derivatives/freesurfer', required=False)
 args.add_argument('-td', '--tmpdir', help='The directory where the temporary files are stored on the local machine', metavar='[path]',\
@@ -24,6 +25,11 @@ if not args.sub.startswith('sub-'):
 if not exists('telegram.py'):
     print('Telegram module not found, messages will not be sent.')
     args.telegram = False
+
+# wait for X minutes before starting this job
+if args.wait > 0:
+    print(f'Waiting for {args.wait} minutes before starting the job.')
+    time.sleep(args.wait * 60)
 
 # cp to local
 try:
