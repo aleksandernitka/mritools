@@ -7,8 +7,8 @@ import time
 
 args=argparse.ArgumentParser(description='This function helps with the reprocessing with recon-all.')
 args.add_argument('sub', help='The subject ID')
-args.add_argument('-f', 'fix', help='The fix to run; either cp, wm, gm or wgm (white then gray matter)', choices=['cp', 'wm', 'gm', 'wgm'], default='wgm')
-args.add_argument('-w', 'wait', help='wait for X minutes before starting this job', type=int, default=0, metavar='minutes')
+args.add_argument('-f', '--fix', help='The fix to run; either cp, wm, gm or wgm (white then gray matter)', choices=['cp', 'wm', 'gm', 'wgm'], default='wgm')
+args.add_argument('-w', '--wait', help='wait for X minutes before starting this job', type=int, default=0, metavar='minutes')
 args.add_argument('-sd', '--subjectsDir', help='The directory where the subjects are stored. Remote drive is ok.', metavar='[path]',\
     default='/mnt/clab/COST_mri/derivatives/freesurfer', required=False)
 args.add_argument('-td', '--tmpdir', help='The directory where the temporary files are stored on the local machine', metavar='[path]',\
