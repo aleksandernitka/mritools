@@ -6,7 +6,7 @@ import pandas as pd
 parser = argparse.ArgumentParser(description='Script for taking stock of the data. Inside there directories which should be looked into are listed.')
 parser.add_argument('-o', '--out', help='Output file. Defaults to data_stock.csv.', default='data_stock.csv')
 parser.add_argument('-i', '--ids', help='Input ID list file (default is valid_subjects.csv).', default='valid_subjects.csv')
-parser.add_argument('-r', '--return', help='Return all IDs or just those with something missing; default: all', default='all', choices=['all', 'missing', 'with_everything'])
+parser.add_argument('-r', '--returns', help='Return all IDs or just those with something missing; default: all', default='all', choices=['all', 'missing', 'with_everything'])
 parser = parser.parse_args()
 
 # Paths to check
@@ -34,14 +34,14 @@ for d in paths.keys():
         # directory should be there with a fqp
         df.loc[i, d] = exists(fqp)
 
-if 'all' in parser.return:
+if parser.returns == 'all':
     df.to_csv(parser.out, index=False)
 
-elif 'missing' in parser.return:
+elif parser.returns == 'missing':
     df = df[df[['hmri', 'dwi', 'freesurfer']] != True].reset_index(drop=True)
     df.to_csv(join(parser.out.split('.csv')[0]+'_missing.csv'), index=False)
 
-elif 'with_everything' in parser.return:
+elif parser.returns == 'with_everything':
     df = df[df[['hmri', 'dwi', 'freesurfer']] == True].reset_index(drop=True)
     df.to_csv(join(parser.out.split('.csv')[0]+'_with_everything.csv'), index=False)
 
