@@ -27,8 +27,10 @@ for d in paths.keys():
     # Add the directory name to the df columns
     df[d] = None
     for i, sub in enumerate(ids):
+        if 'sub-' not in str(sub):
+            sub = 'sub-'+str(sub)
         # Fully qualified path
-        fqp = join(paths[d], sub)
+        fqp = join(paths[d], str(sub))
         # directory should be there with a fqp
         df.loc[i, d] = exists(fqp)
 
