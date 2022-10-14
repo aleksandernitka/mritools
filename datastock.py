@@ -18,13 +18,11 @@ paths = {
 }
 
 # Load the Ids for which we need to do the check
-df_subs = pd.read_csv(parser.ids)
-ids = df_subs.ID.values
+df = pd.read_csv(parser.ids)
+ids = df.ID.values
 print(f'{len(ids)} valid subjects loaded from {parser.ids}')
 
-# start the main df for stock keeping
-df = pd.DataFrame(ID=ids, columns=['ID'])
-
+# Iterate all Ids
 for d in paths.keys():
     # Add the directory name to the df columns
     df[d] = None
