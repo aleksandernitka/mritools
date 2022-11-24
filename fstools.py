@@ -21,11 +21,11 @@ class seg:
         self.pd_images_dir = expanduser(self.pd_images_dir)
         
         # Check if the subjects_dir exists
-        if not exists(subjects_dir):
+        if not exists(self.subjects_dir):
             raise Exception("Subjects directory does not exist")
 
         # Check if the pd_images_dir exists
-        if not exists(pd_images_dir):
+        if not exists(self.pd_images_dir):
             raise Exception("PD images directory does not exist")
 
         if not exists(self.stats_output_dir):
