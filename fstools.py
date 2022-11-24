@@ -6,7 +6,7 @@ class seg:
     def __init__(self, subjects_dir, stats_output_dir, analysis_id, pd_images_dir, telegram_bot=None):
 
         import subprocess as sp
-        from os.path import join, exists
+        from os.path import join, exists, expanduser
         # TODO add time to measure the duration and ETA
         
         self.subjects_dir = subjects_dir
@@ -15,6 +15,11 @@ class seg:
         self.pd_images_dir = pd_images_dir
         self.telegram_bot = telegram_bot # TODO: implement
 
+        # Get full path
+        self.subjects_dir = expanduser(self.subjects_dir)
+        self.stats_output_dir = expanduser(self.stats_output_dir)
+        self.pd_images_dir = expanduser(self.pd_images_dir)
+        
         # Check if the subjects_dir exists
         if not exists(subjects_dir):
             raise Exception("Subjects directory does not exist")
