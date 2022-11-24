@@ -81,7 +81,7 @@ class seg:
 
         for stats_file in stats_files:
             sp.run(f'cp {join(self.subjects_dir, subject_id, "stats", stats_file)} \
-                {join(self.stats_output_dir, self.analysis_id, "stats", "{subject_id}_{stats_file}")}', shell=True)
+                {join(self.stats_output_dir, self.analysis_id, "stats", f"{subject_id}_{stats_file}")}', shell=True)
       
         print(f'Finished HPC/AMG segmentation on {subject_id}')
 
