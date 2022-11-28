@@ -3,17 +3,28 @@ Runs the HPC/AMG segmentation algorithm on a set of freesurfer data. Extracts st
 """
 
 class seg:
-    def __init__(self, subjects_dir, stats_output_dir, analysis_id, pd_images_dir, telegram_bot=None):
+    def __init__(self, subjects_dir, stats_output_dir, analysis_id, pd_images_dir, threads=40, telegram=True):
 
         import subprocess as sp
         from os.path import join, exists, expanduser
+        
         # TODO add time to measure the duration and ETA
         
         self.subjects_dir = subjects_dir
         self.stats_output_dir = stats_output_dir
         self.analysis_id = analysis_id
         self.pd_images_dir = pd_images_dir
-        self.telegram_bot = telegram_bot # TODO: implement
+        self.telegram = telegram
+        self.thread = threads
+
+        if self.telegram:
+            try:
+                from send_telegram import sendtel
+                self.tgsend = sendtel()
+            except:
+                print("Could not import send_telegram")
+                self.telegram = False
+                self.tgsend = None
 
         # Get full path
         self.subjects_dir = expanduser(self.subjects_dir)
@@ -63,7 +74,7 @@ class seg:
         
         # all good to go
         # run the segmentation
-        sp.run(f'segmentHA_T2.sh {subject_id} \
+        sp.run(f'export ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={self.threads}; segmentHA_T2.sh {subject_id} \
             {join(self.pd_images_dir, subject_id, "Results", f"{subject_id}_PD_iPAT2_23_1_RFSC_PD.nii")} \
             {self.analysis_id} \
             1 \
@@ -102,7 +113,9 @@ class seg:
             self.run_hpc_sub(subject, print_count=False)
 
         print(f'Finished HPC/AMG segmentation on {len(subjects)} subjects')
-        # TODO add telegram bot message
+        if self.telegram:
+            self.tgsend(f'Finished HPC/AMG segmentation on {len(subject_list)} subjects')
+
         
     def run_hpc_list(self, subject_list):
         "Run for subjects in a given list"
@@ -115,7 +128,9 @@ class seg:
             self.run_hpc_sub(subject, print_count=False)
 
         print(f'Finished HPC/AMG segmentation on {len(subject_list)} subjects')
-        # TODO add telegram bot message
+        if self.telegram:
+            self.tgsend(f'Finished HPC/AMG segmentation on {len(subject_list)} subjects')
+
 
 class seg_tha(seg):
     pass
