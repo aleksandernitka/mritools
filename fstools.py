@@ -3,15 +3,14 @@ Runs the HPC/AMG segmentation algorithm on a set of freesurfer data. Extracts st
 """
 
 class seg:
-    def __init__(self, subjects_dir, stats_output_dir, analysis_id, pd_images_dir, threads=40, telegram=True):
+    def __init__(self, subjects_dir, analysis_id, pd_images_dir, threads=40, telegram=True):
 
         import subprocess as sp
-        from os.path import join, exists, expanduser
+        from os.path import exists, expanduser
         from statistics import mean as mean
         from time import perf_counter as ptime
         
         self.subjects_dir = subjects_dir
-        self.stats_output_dir = stats_output_dir
         self.analysis_id = analysis_id
         self.pd_images_dir = pd_images_dir
         self.telegram = telegram
@@ -19,19 +18,20 @@ class seg:
         self.mean = mean
         self.ptime = ptime
         self.timings = [] # keep the durations for each subject
+        self.errlog = f'{self.analysis_id}_errlog.txt'
 
         if self.telegram:
             try:
                 from send_telegram import sendtel
                 self.tgsend = sendtel()
+                print('Telegram notifications enabled')
             except:
-                print("Could not import send_telegram")
                 self.telegram = False
                 self.tgsend = None
+                print("Could not import send_telegram")
 
         # Get full path
         self.subjects_dir = expanduser(self.subjects_dir)
-        self.stats_output_dir = expanduser(self.stats_output_dir)
         self.pd_images_dir = expanduser(self.pd_images_dir)
         
         # Check if the subjects_dir exists
@@ -42,35 +42,30 @@ class seg:
         if not exists(self.pd_images_dir):
             raise Exception("PD images directory does not exist")
 
-        if not exists(self.stats_output_dir):
-            sp.run(f'mkdir {self.stats_output_dir}', shell=True)
-            print(f'Created {self.stats_output_dir}')
-        if not exists(join(self.stats_output_dir, self.analysis_id)):
-            sp.run(f'mkdir {join(self.stats_output_dir, self.analysis_id)}', shell=True)
-            print(f'Created {join(self.stats_output_dir, self.analysis_id)}')
-        if not exists(join(self.stats_output_dir, self.analysis_id, 'stats')):
-            sp.run(f'mkdir {join(self.stats_output_dir, self.analysis_id, "stats")}', shell=True)
-            print(f'Created {join(self.stats_output_dir, self.analysis_id, "stats")}')
-        if not exists(join(self.stats_output_dir, self.analysis_id, 'logs')):
-            sp.run(f'mkdir {join(self.stats_output_dir, self.analysis_id, "logs")}', shell=True)
-            print(f'Created {join(self.stats_output_dir, self.analysis_id, "logs")}')
+    def log_error(self, subject_id, error):
+        "Log the error to a file"
+        from datetime import datetime as dt
+        with open(self.errlog, 'a') as f:
+            f.write(f'{dt.now()}\t{subject_id}\t{error}\n')
+            f.close()
 
     def run_hpc_sub(self, subject_id, print_count=True):
 
         import subprocess as sp
         from os.path import join, exists
 
-        
         # Check subject id
         if not subject_id.startswith('sub-'):
             subject_id = f'sub-{subject_id}'
-        
+
         # Check if the subject exists
         if not exists(join(self.subjects_dir, subject_id)):
+            self.log_error(subject_id, 'Subject dir does not exist')
             raise Exception(f"Subject {subject_id} does not exist")
-
+        
         # Check if the subject has a PD image
         if not exists(join(self.pd_images_dir, subject_id, 'Results', f'{subject_id}_PD_iPAT2_23_1_RFSC_PD.nii')):
+            self.log_error(subject_id, 'PD image does not exist')
             raise Exception(f"Subject {subject_id} does not have a PD image")
         
         if print_count:
