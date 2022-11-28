@@ -7,8 +7,8 @@ class seg:
 
         import subprocess as sp
         from os.path import join, exists, expanduser
-        
-        # TODO add time to measure the duration and ETA
+        from statistics import mean as mean
+        from time import perf_counter as ptime
         
         self.subjects_dir = subjects_dir
         self.stats_output_dir = stats_output_dir
@@ -16,6 +16,9 @@ class seg:
         self.pd_images_dir = pd_images_dir
         self.telegram = telegram
         self.thread = threads
+        self.mean = mean
+        self.ptime = ptime
+        self.timings = [] # keep the durations for each subject
 
         if self.telegram:
             try:
@@ -56,6 +59,7 @@ class seg:
 
         import subprocess as sp
         from os.path import join, exists
+
         
         # Check subject id
         if not subject_id.startswith('sub-'):
@@ -73,6 +77,10 @@ class seg:
             print(f'Running HPC/AMG segmentation on {subject_id}')
         
         # all good to go
+
+        # start timing
+        tstart = self.ptime()
+
         # run the segmentation
         sp.run(f'export ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={self.threads}; segmentHA_T2.sh {subject_id} \
             {join(self.pd_images_dir, subject_id, "Results", f"{subject_id}_PD_iPAT2_23_1_RFSC_PD.nii")} \
@@ -80,23 +88,10 @@ class seg:
             1 \
             {self.subjects_dir}', shell=True)
         
-        # extract log file
-        sp.run(f'cp {join(self.subjects_dir, subject_id, "scripts", f"hippocampal-subfields-T2.{self.analysis_id}.log")} \
-            {join(self.stats_output_dir, self.analysis_id, "logs", "{subject_id}_hippocampal-subfields-T2.{self.analysis_id}.log")}', shell=True)
-
-        # extract stats
-        stats_files = [f'amygdalar-nuclei.rh.T2.v21.{self.analysis_id}.stats', \
-        f'hipposubfields.rh.T2.v21.{self.analysis_id}.stats', \
-        f'amygdalar-nuclei.lh.T2.v21.{self.analysis_id}.stats', \
-        f'hipposubfields.lh.T2.v21.{self.analysis_id}.stats']
-
-        for stats_file in stats_files:
-            
-            sp.run(f'cp {join(self.subjects_dir, subject_id, "stats", stats_file)} \
-                {join(self.stats_output_dir, self.analysis_id, "stats", f"{subject_id}_{stats_file}")}', shell=True)
-            
-      
-        print(f'Finished HPC/AMG segmentation on {subject_id}')
+        # end time
+        tend = self.ptime()
+        self.timings.append(tend-tstart)
+        print(f'Finished HPC/AMG segmentation on {subject_id}, it took {(tend-tstart)/60} minutes')
 
     def run_hpc_all(self):
         "Run for all subjects in FS subjects_dir"
@@ -112,11 +107,15 @@ class seg:
             print(f'\nRunning HPC/AMG segmentation on {subject} ({i+1}/{len(subjects)})\n')
             self.run_hpc_sub(subject, print_count=False)
 
+            # Print the mean time and how much time is left
+            if len(self.timings) > 2:
+                print(f'Average time per subject: {self.mean(self.timings)/60} minutes')
+                print(f'Estimated time remaining: {((len(subjects)-i)*self.mean(self.timings))/60} minutes')
+
         print(f'Finished HPC/AMG segmentation on {len(subjects)} subjects')
         if self.telegram:
             self.tgsend(f'Finished HPC/AMG segmentation on {len(subject_list)} subjects')
-
-        
+ 
     def run_hpc_list(self, subject_list):
         "Run for subjects in a given list"
         if len(subject_list) == 0:
@@ -126,6 +125,11 @@ class seg:
         for i, subject in enumerate(subject_list):
             print(f'\nRunning HPC/AMG segmentation on {subject} ({i+1}/{len(subject_list)})\n')
             self.run_hpc_sub(subject, print_count=False)
+            
+            # Print the mean time and how much time is left
+            if len(self.timings) > 2:
+                print(f'Average time per subject: {self.mean(self.timings)/60} minutes')
+                print(f'Estimated time remaining: {((len(subject_list)-i)*self.mean(self.timings))/60} minutes')
 
         print(f'Finished HPC/AMG segmentation on {len(subject_list)} subjects')
         if self.telegram:
