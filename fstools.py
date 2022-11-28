@@ -14,7 +14,7 @@ class seg:
         self.analysis_id = analysis_id
         self.pd_images_dir = pd_images_dir
         self.telegram = telegram
-        self.thread = threads
+        self.threads = threads
         self.mean = mean
         self.ptime = ptime
         self.timings = [] # keep the durations for each subject
