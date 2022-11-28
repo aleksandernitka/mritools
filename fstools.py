@@ -20,6 +20,9 @@ class seg:
         self.timings = [] # keep the durations for each subject
         self.errlog = f'{self.analysis_id}_errlog.txt'
 
+        # TODO send a message to telegram, mean and sd time it took per ss at the end of script
+        # TODO suppress output from subprocesses
+
         if self.telegram:
             try:
                 from send_telegram import sendtel
@@ -61,12 +64,14 @@ class seg:
         # Check if the subject exists
         if not exists(join(self.subjects_dir, subject_id)):
             self.log_error(subject_id, 'Subject dir does not exist')
-            raise Exception(f"Subject {subject_id} does not exist")
+            print(f"Subject {subject_id} does not exist")
+            return None
         
         # Check if the subject has a PD image
         if not exists(join(self.pd_images_dir, subject_id, 'Results', f'{subject_id}_PD_iPAT2_23_1_RFSC_PD.nii')):
             self.log_error(subject_id, 'PD image does not exist')
-            raise Exception(f"Subject {subject_id} does not have a PD image")
+            print(f"Subject {subject_id} does not have a PD image")
+            return None
         
         if print_count:
             print(f'Running HPC/AMG segmentation on {subject_id}')
@@ -110,6 +115,8 @@ class seg:
         print(f'Finished HPC/AMG segmentation on {len(subjects)} subjects')
         if self.telegram:
             self.tgsend(f'Finished HPC/AMG segmentation on {len(subject_list)} subjects')
+
+        return None
  
     def run_hpc_list(self, subject_list):
         "Run for subjects in a given list"
@@ -123,8 +130,7 @@ class seg:
             
             # Print the mean time and how much time is left
             if len(self.timings) > 2:
-                print(f'Average time per subject: {self.mean(self.timings)/60} minutes')
-                print(f'Estimated time remaining: {((len(subject_list)-i)*self.mean(self.timings))/60} minutes')
+                print(f'Average time per subject: {self.mean(self.timings)/60} minutes. Estimated time remaining: {((len(subject_list)-i)*self.mean(self.timings))/60} minutes')
 
         print(f'Finished HPC/AMG segmentation on {len(subject_list)} subjects')
         if self.telegram:
