@@ -68,10 +68,10 @@ class seg:
             {self.analysis_id} \
             1 \
             {self.subjects_dir}', shell=True)
-
+        
         # extract log file
         sp.run(f'cp {join(self.subjects_dir, subject_id, "scripts", f"hippocampal-subfields-T2.{self.analysis_id}.log")} \
-            {join(self.stats_output_dir, self.analysis_id, "logs", f"{subject_id}_hippocampal-subfields-T2.{self.analysis_id}.log")}', shell=True)
+            {join(self.stats_output_dir, self.analysis_id, "logs", "{subject_id}_hippocampal-subfields-T2.{self.analysis_id}.log")}', shell=True)
 
         # extract stats
         stats_files = [f'amygdalar-nuclei.rh.T2.v21.{self.analysis_id}.stats', \
@@ -80,8 +80,10 @@ class seg:
         f'hipposubfields.lh.T2.v21.{self.analysis_id}.stats']
 
         for stats_file in stats_files:
+            
             sp.run(f'cp {join(self.subjects_dir, subject_id, "stats", stats_file)} \
                 {join(self.stats_output_dir, self.analysis_id, "stats", f"{subject_id}_{stats_file}")}', shell=True)
+            
       
         print(f'Finished HPC/AMG segmentation on {subject_id}')
 
