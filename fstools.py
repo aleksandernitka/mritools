@@ -5,11 +5,9 @@ Runs the HPC/AMG segmentation algorithm on a set of freesurfer data. Extracts st
 class seg:
     def __init__(self, subjects_dir, analysis_id, pd_images_dir, threads=40, telegram=True, skip_existing=True):
 
-        import subprocess as sp
         from os.path import exists, expanduser
-        from statistics import mean as mean
         from time import perf_counter as ptime
-        from datetime import datetime, timedelta
+        from datetime import datetime
         
         self.subjects_dir = subjects_dir
         self.analysis_id = analysis_id
@@ -17,21 +15,17 @@ class seg:
         self.telegram = telegram
         self.threads = threads
         self.skip_existing = skip_existing
-        self.mean = mean
         self.ptime = ptime
         self.dt = datetime
-        self.td = timedelta
         self.timings = [] # keep the durations for each subject
         self.errlog = f'{self.analysis_id}_errlog.txt'
 
         # TODO send a message to telegram, mean and sd time it took per ss at the end of script
-        # TODO suppress output from subprocesses
-        # TODO check if such analysis id have been run before - if yes, skip sub. if no, run it
 
         if self.telegram:
             try:
                 from send_telegram import sendtel
-                self.tgsend = sendtel()
+                self.tgsend = sendtel
                 print('Telegram notifications enabled')
             except:
                 self.telegram = False
@@ -51,6 +45,7 @@ class seg:
             raise Exception("PD images directory does not exist")
 
     def log_error(self, subject_id, error):
+        
         "Log the error to a file"
         from datetime import datetime as dt
         with open(self.errlog, 'a') as f:
@@ -58,6 +53,7 @@ class seg:
             f.close()
 
     def check_exists(self, subject_id):
+        
         "Check if the subject has been processed before"
         from os.path import exists, join, expanduser
         
@@ -67,10 +63,14 @@ class seg:
             return False
 
     def progress_info(self, iteration):
+
         "Print progress info"
+        from statistics import median as median
+        from datetime import timedelta as td
+
         # Print the mean time and how much time is left
         if len(self.timings) > 2:
-            print(f'M time per sub: {self.mean(self.timings)/60} minutes. ETA: {self.dt.now() + self.td(minutes=((len(self.subjects)-iteration)*self.mean(self.timings))/60)}')
+            print(f'M time per sub: {median(self.timings)/60} minutes. ETA: {self.dt.now() + td(minutes=((len(self.subjects)-iteration)*median(self.timings))/60)}')
         
     def run_hpc_sub(self, subject_id, print_count=True):
 
@@ -106,8 +106,9 @@ class seg:
             1 \
             {self.subjects_dir}', shell=True, capture_output=True)
         
-        # Above will suppress the output from the subprocess, capture it and print it if there is an error
+        # Above sp.run will suppress the output from the subprocess, capture it and print it if there is an error
         # If all is well we can access the log file in the subject's directory, but errors may get lost. 
+
         if process.returncode != 0:
             self.log_error(subject_id, 'Segmentation failed')
             print(f"Subject {subject_id} segmentation failed: {process.stderr.decode('utf-8')}")
