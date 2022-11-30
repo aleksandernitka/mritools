@@ -88,24 +88,35 @@ class seg:
             return None
         
         if print_count:
-            print(f'Running HPC/AMG segmentation on {subject_id}')
-        
-        # all good to go
+            print(f'Running HPC/AMG segmentation on {subject_id}, starting at {self.dt.now()}')
 
         # start timing
         tstart = self.ptime()
 
         # run the segmentation
-        sp.run(f'export ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={self.threads}; segmentHA_T2.sh {subject_id} \
+        process = sp.run(f'export ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={self.threads}; segmentHA_T2.sh {subject_id} \
             {join(self.pd_images_dir, subject_id, "Results", f"{subject_id}_PD_iPAT2_23_1_RFSC_PD.nii")} \
             {self.analysis_id} \
             1 \
-            {self.subjects_dir}', shell=True)
+            {self.subjects_dir}', shell=True, capture_output=True)
+        
+        # Above will suppress the output from the subprocess, capture it and print it if there is an error
+        # If all is well we can access the log file in the subject's directory, but errors may get lost. 
+        if process.returncode != 0:
+            self.log_error(subject_id, 'Segmentation failed')
+            print(f"Subject {subject_id} segmentation failed: {process.stderr.decode('utf-8')}")
+            # Also save it for later
+            with open(f'{subject_id}_seg_err.txt', 'w') as f:
+                f.write(process.stderr.decode('utf-8'))
+                f.close()
+            return None
         
         # end time
         tend = self.ptime()
         self.timings.append(tend-tstart)
         print(f'Finished HPC/AMG segmentation on {subject_id}, it took {(tend-tstart)/60} minutes')
+
+        return None
 
     def run_hpc_all(self):
 
