@@ -57,6 +57,15 @@ class seg:
             f.write(f'{dt.now()}\t{subject_id}\t{error}\n')
             f.close()
 
+    def check_exists(self, subject_id):
+        "Check if the subject has been processed before"
+        from os.path import exists, join
+        
+        if exists(join(self.subjects_dir, subject_id, 'mri', '{self.analysis_id}.FSspace.mgz')):
+            return True
+        else:
+            return False
+
     def run_hpc_sub(self, subject_id, print_count=True):
 
         import subprocess as sp
@@ -99,6 +108,7 @@ class seg:
         print(f'Finished HPC/AMG segmentation on {subject_id}, it took {(tend-tstart)/60} minutes')
 
     def run_hpc_all(self):
+
         "Run for all subjects in FS subjects_dir"
         from os import listdir as ls
         
@@ -110,7 +120,13 @@ class seg:
         print(f'Running HPC/AMG segmentation on {len(subjects)} subjects')
         
         for i, subject in enumerate(subjects):
-            # TODO check if sub has been processed before
+            
+            # check if sub has been processed before
+            if self.skip_existing:
+                if self.check_exists(subject):
+                    print(f'Subject {subject} has been processed before, skipping')
+                    continue
+        
             print(f'\nRunning HPC/AMG segmentation on {subject} ({i+1}/{len(subjects)})\n')
             self.run_hpc_sub(subject, print_count=False)
 
@@ -136,7 +152,13 @@ class seg:
         print(f'Running HPC/AMG segmentation on {len(subject_list)} subjects')
         
         for i, subject in enumerate(subject_list):
-            # TODO check if sub has been processed before
+            
+            # check if sub has been processed before
+            if self.skip_existing:
+                if self.check_exists(subject):
+                    print(f'Subject {subject} has been processed before, skipping')
+                    continue
+            
             print(f'\nRunning HPC/AMG segmentation on {subject} ({i+1}/{len(subject_list)})\n')
             self.run_hpc_sub(subject, print_count=False)
             
