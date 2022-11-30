@@ -61,11 +61,17 @@ class seg:
         "Check if the subject has been processed before"
         from os.path import exists, join, expanduser
         
-        if exists(join(expanduser(self.subjects_dir) subject_id, 'mri', f'{self.analysis_id}.FSspace.mgz')):
+        if exists(join(expanduser(self.subjects_dir), subject_id, 'mri', f'{self.analysis_id}.FSspace.mgz')):
             return True
         else:
             return False
 
+    def progress_info(self, iteration):
+        "Print progress info"
+        # Print the mean time and how much time is left
+        if len(self.timings) > 2:
+            print(f'M time per sub: {self.mean(self.timings)/60} minutes. ETA: {self.dt.now() + self.td(minutes=((len(self.subjects)-iteration)*self.mean(self.timings))/60)}')
+        
     def run_hpc_sub(self, subject_id, print_count=True):
 
         import subprocess as sp
@@ -117,52 +123,19 @@ class seg:
         print(f'Finished HPC/AMG segmentation on {subject_id}, it took {(tend-tstart)/60} minutes')
 
         return None
-
-    def run_hpc_all(self):
-
-        "Run for all subjects in FS subjects_dir"
-        from os import listdir as ls
-        
-        subjects = [s for s in ls(self.subjects_dir) if s.startswith('sub-')]
-        
-        if len(subjects) == 0:
-            raise Exception("No subjects found in subjects_dir")
-
-        print(f'Running HPC/AMG segmentation on {len(subjects)} subjects')
-        
-        for i, subject in enumerate(subjects):
-            
-            # check if sub has been processed before
-            if self.skip_existing:
-                if self.check_exists(subject):
-                    print(f'Subject {subject} has been processed before, skipping')
-                    continue
-        
-            print(f'\nRunning HPC/AMG segmentation on {subject} ({i+1}/{len(subjects)})\n')
-            self.run_hpc_sub(subject, print_count=False)
-
-            # Print the mean time and how much time is left
-            if len(self.timings) > 2:
-                print('=====================================')
-                print(f'Average time per subject: {self.mean(self.timings)/60} minutes')
-                print(f'Estimated time remaining: {((len(subjects)-i)*self.mean(self.timings))/60} minutes')
-                print(f'Estimated finish time: {self.dt.now() + self.td(minutes=((len(subjects)-i)*self.mean(self.timings))/60)}')
-                print('=====================================')
-
-        print(f'Finished HPC/AMG segmentation on {len(subjects)} subjects')
-        if self.telegram:
-            self.tgsend(f'Finished HPC/AMG segmentation on {len(subjects)} subjects')
-
-        return None
  
     def run_hpc_list(self, subject_list):
+        
         "Run for subjects in a given list"
+        
         if len(subject_list) == 0:
             raise Exception("No subjects found in subject_list")
 
-        print(f'Running HPC/AMG segmentation on {len(subject_list)} subjects')
+        self.subjects = subject_list
+
+        print(f'Running HPC/AMG segmentation on {len(self.subjects)} subjects')
         
-        for i, subject in enumerate(subject_list):
+        for i, subject in enumerate(self.subjects):
             
             # check if sub has been processed before
             if self.skip_existing:
@@ -170,21 +143,14 @@ class seg:
                     print(f'Subject {subject} has been processed before, skipping')
                     continue
             
-            print(f'\nRunning HPC/AMG segmentation on {subject} ({i+1}/{len(subject_list)})\n')
+            print(f'\nRunning HPC/AMG segmentation on {subject} ({i+1}/{len(self.subjects)})\n')
             self.run_hpc_sub(subject, print_count=False)
-            
-            # Print the mean time and how much time is left
-            if len(self.timings) > 2:
-                print('=====================================')
-                print(f'Average time per subject: {self.mean(self.timings)/60} minutes.')
-                print(f'Estimated time remaining: {((len(subject_list)-i)*self.mean(self.timings))/60} minutes.')
-                print(f'Estimated finish time: {self.dt.now() + self.td(minutes=((len(subject_list)-i)*self.mean(self.timings))/60)}')
-                print('=====================================')
 
-        print(f'Finished HPC/AMG segmentation on {len(subject_list)} subjects')
+            # print progress info
+            self.progress_info(i)
+
+        print(f'Finished HPC/AMG segmentation on {len(self.subjects)} subjects')
         if self.telegram:
-            self.tgsend(f'Finished HPC/AMG segmentation on {len(subject_list)} subjects')
+            self.tgsend(f'Finished HPC/AMG segmentation on {len(self.subjects)} subjects')
 
 
-class seg_tha(seg):
-    pass
