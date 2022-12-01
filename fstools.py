@@ -56,6 +56,10 @@ class seg:
         
         "Check if the subject has been processed before"
         from os.path import exists, join, expanduser
+
+        # check if there was an error with this sub
+        if exists(f'{subject_id}_seg_err.txt'):
+            return True
         
         if exists(join(expanduser(self.subjects_dir), subject_id, 'mri', f'{self.analysis_id}.FSspace.mgz')):
             return True
