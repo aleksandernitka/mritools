@@ -3,11 +3,14 @@ Runs the HPC/AMG segmentation algorithm on a set of freesurfer data. Extracts st
 """
 
 class seg:
+    
     def __init__(self, subjects_dir, analysis_id, pd_images_dir, threads=40, telegram=True, skip_existing=True):
 
         from os.path import exists, expanduser
         from time import perf_counter as ptime
         from datetime import datetime
+
+        # add time to printout of the analysis so we know what time we started.
         
         self.subjects_dir = subjects_dir
         self.analysis_id = analysis_id
