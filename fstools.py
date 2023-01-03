@@ -91,7 +91,11 @@ class seg:
 
         # List previous errors:
         err_logged = [s for s in ls() if s.endswith('_seg_err.txt')]
-        print(f'Found len(err_logged) error logs.')
+        print(f'Found {len(err_logged)} error logs.')
+        if list_ids:
+            print('details:')
+            for s in err_logged:
+                print(s)
         
         errSubjects = [s for s in unprocessedSubjects if s in err_logged]
         print(f'That includes: {len(errSubjects)} subjects have not been processed due to a previous error.')
