@@ -74,11 +74,11 @@ class seg:
         Print information about the data. What has and what has not been processed so far.
         """
         from os import listdir as ls
-        from os.path import join, exists, expanduser
+        from os.path import exists
 
         # Get the subjects from the FS subjects_dir
         allSubjects = [s for s in ls(self.subjects_dir) if s.startswith('sub-')]
-        print(f'Data info for f{self.analysis_id}.')
+        print(f'Data info for {self.analysis_id}.')
         print(f'Found a total of {len(allSubjects)} subjects in {self.subjects_dir}.')
 
         # Get the subjects that have been processed
@@ -90,7 +90,8 @@ class seg:
         print(f'{len(unprocessedSubjects)} subjects have not been processed.')
 
         # List not processed due to a previous error:
-        errSubjects = [s for s in unprocessedSubjects if exists(f'{s}_seg_err.txt')]
+        err_logged = [s for s in ls() if s.endswith('_seg_err.txt')]
+        errSubjects = [s for s in unprocessedSubjects if s in err_logged]
         print(f'That includes: {len(errSubjects)} subjects have not been processed due to a previous error.')
         # IF details are required, print them
         if list_ids:
