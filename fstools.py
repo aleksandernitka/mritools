@@ -89,8 +89,10 @@ class seg:
         unprocessedSubjects = [s for s in allSubjects if not self.check_exists(s)]
         print(f'{len(unprocessedSubjects)} subjects have not been processed.')
 
-        # List not processed due to a previous error:
+        # List previous errors:
         err_logged = [s for s in ls() if s.endswith('_seg_err.txt')]
+        print(f'Found len(err_logged) error logs.')
+        
         errSubjects = [s for s in unprocessedSubjects if s in err_logged]
         print(f'That includes: {len(errSubjects)} subjects have not been processed due to a previous error.')
         # IF details are required, print them
