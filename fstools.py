@@ -1,9 +1,11 @@
-"""
-Runs the HPC/AMG segmentation algorithm on a set of freesurfer data. Extracts stats to a separate directory for easier access.
-"""
+
 
 class seg:
-    
+    """
+    Runs the HPC/AMG segmentation algorithm on a set of freesurfer data. Extracts stats to a separate directory for easier access.
+    The script will check if the subject has been processed before, and if so it will skip it.
+    The script will also check if the subject has a PD image, and if not it will skip it.
+    """
     def __init__(self, subjects_dir, analysis_id, pd_images_dir, threads=40, telegram=True, skip_existing=True):
 
         from os.path import exists, expanduser
@@ -23,8 +25,6 @@ class seg:
         self.timings = [] # keep the durations for each subject
         self.errlog = f'{self.analysis_id}_errlog.txt'
 
-        # TODO send a message to telegram, mean and sd time it took per ss at the end of script
-
         if self.telegram:
             try:
                 from send_telegram import sendtel
@@ -35,7 +35,7 @@ class seg:
                 self.tgsend = None
                 print("Could not import send_telegram")
 
-        # Get full path
+        # Get full paths for PD image and Freesurfer subjects_dir
         self.subjects_dir = expanduser(self.subjects_dir)
         self.pd_images_dir = expanduser(self.pd_images_dir)
         
@@ -60,7 +60,7 @@ class seg:
         "Check if the subject has been processed before"
         from os.path import exists, join, expanduser
 
-        # check if there was an error with this sub
+        # check if there was an error with this sub and so the segmentation was not performed
         if exists(f'{subject_id}_seg_err.txt'):
             return True
         
@@ -68,6 +68,46 @@ class seg:
             return True
         else:
             return False
+
+    def data_info(self, list_ids=False):
+        """
+        Print information about the data. What has and what has not been processed so far.
+        """
+        from os import listdir as ls
+        from os.path import join, exists, expanduser
+
+        # Get the subjects from the FS subjects_dir
+        allSubjects = [s for s in ls(self.subjects_dir) if s.startswith('sub-')]
+        print(f'Data info for f{self.analysis_id}.')
+        print(f'Found a total of {len(allSubjects)} subjects in {self.subjects_dir}.')
+
+        # Get the subjects that have been processed
+        processedSubjects = [s for s in allSubjects if self.check_exists(s)]
+        print(f'{len(processedSubjects)} subjects have been processed.')
+
+        # Get the subjects that have not been processed
+        unprocessedSubjects = [s for s in allSubjects if not self.check_exists(s)]
+        print(f'{len(unprocessedSubjects)} subjects have not been processed.')
+
+        # List not processed due to a previous error:
+        errSubjects = [s for s in unprocessedSubjects if exists(f'{s}_seg_err.txt')]
+        print(f'That includes: {len(errSubjects)} subjects have not been processed due to a previous error.')
+        # IF details are required, print them
+        if list_ids:
+            print('details:')
+            for s in errSubjects:
+                print(s)
+
+        # List not processed:
+        unprocessedSubjects = [s for s in unprocessedSubjects if not s in errSubjects]
+        print(f'That includes: {len(unprocessedSubjects)} subjects have not been processed.')
+        # IF details are required, print them
+        if list_ids:
+            print('details:')
+            for s in unprocessedSubjects:
+                print(s)
+        
+
 
     def progress_info(self, iteration):
 
