@@ -2,7 +2,7 @@
 
 class seg:
     """
-    Runs the HPC/AMG segmentation algorithm on a set of freesurfer data. Extracts stats to a separate directory for easier access.
+    Runs the segmentation algorithms on a set of freesurfer data. Extracts stats to a separate directory for easier access.
     The script will check if the subject has been processed before, and if so it will skip it.
     The script will also check if the subject has a PD image, and if not it will skip it.
     """
@@ -55,13 +55,16 @@ class seg:
             f.write(f'{dt.now()}\t{subject_id}\t{error}\n')
             f.close()
 
-    def check_exists(self, subject_id):
+    def check_exists(self, subject_id, seg_type):
         
-        "Check if the subject has been processed before"
+        """
+        Check if the subject has been processed before
+        seg_type is the three-letter code of module, eg., HPC, THN, etc
+        """
         from os.path import exists, join, expanduser
 
         # check if there was an error with this sub and so the segmentation was not performed
-        if exists(f'{subject_id}_seg_err.txt'):
+        if exists(f'{subject_id}_{seg_type}_seg_err.txt'):
             return True
         
         if exists(join(expanduser(self.subjects_dir), subject_id, 'mri', f'{self.analysis_id}.FSspace.mgz')):
@@ -114,8 +117,6 @@ class seg:
             for s in unprocessedSubjects:
                 print(s)
         
-
-
     def progress_info(self, iteration):
 
         "Print progress info"
@@ -130,6 +131,7 @@ class seg:
 
         import subprocess as sp
         from os.path import join, exists
+        from os import listdir as ls
 
         # Check subject id
         if not subject_id.startswith('sub-'):
@@ -142,11 +144,17 @@ class seg:
             return None
         
         # Check if the subject has a PD image
-        if not exists(join(self.pd_images_dir, subject_id, 'Results', f'{subject_id}_PD_iPAT2_23_1_RFSC_PD.nii')):
+        # list all PD images in mpm dir
+        pd_images = [f for f in ls(join(self.pd_images_dir, subject_id, 'Results')) if f.endswith('PD.nii')]
+        if len(pd_images) == 0:
             self.log_error(subject_id, 'PD image does not exist')
             print(f"Subject {subject_id} does not have a PD image")
             return None
-        
+        elif len(pd_images) > 1:
+            self.log_error(subject_id, 'Multiple PD images')
+            print(f"Subject {subject_id} has multiple PD images")
+            return None
+        # otherwise we will have exactly one image -> pd_images[0]
         if print_count:
             print(f'Running HPC/AMG segmentation on {subject_id}, starting at {self.dt.now()}')
 
@@ -155,7 +163,7 @@ class seg:
 
         # run the segmentation
         process = sp.run(f'export ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={self.threads}; segmentHA_T2.sh {subject_id} \
-            {join(self.pd_images_dir, subject_id, "Results", f"{subject_id}_PD_iPAT2_23_1_RFSC_PD.nii")} \
+            {join(self.pd_images_dir, subject_id, "Results", pd_images[0])} \
             {self.analysis_id} \
             1 \
             {self.subjects_dir}', shell=True, capture_output=True)
@@ -167,7 +175,7 @@ class seg:
             self.log_error(subject_id, 'Segmentation failed')
             print(f"Subject {subject_id} segmentation failed: {process.stderr.decode('utf-8')}")
             # Also save it for later
-            with open(f'{subject_id}_seg_err.txt', 'w') as f:
+            with open(f'{subject_id}_hpc_seg_err.txt', 'w') as f:
                 f.write(process.stderr.decode('utf-8'))
                 f.close()
             return None
@@ -194,7 +202,7 @@ class seg:
             
             # check if sub has been processed before
             if self.skip_existing:
-                if self.check_exists(subject):
+                if self.check_exists(subject, 'hpc'):
                     print(f'Subject {subject} has been processed before, skipping')
                     continue
             
@@ -208,4 +216,93 @@ class seg:
         if self.telegram:
             self.tgsend(f'Finished HPC/AMG segmentation on {len(self.subjects)} subjects')
 
+    def run_thn_sub(self, subject_id, print_count=True):
 
+        import subprocess as sp
+        from os.path import join, exists
+        from os import listdir as ls
+
+        # Check subject id
+        if not subject_id.startswith('sub-'):
+            subject_id = f'sub-{subject_id}'
+
+        # Check if the subject exists
+        if not exists(join(self.subjects_dir, subject_id)):
+            self.log_error(subject_id, 'Subject dir does not exist')
+            print(f"Subject {subject_id} does not exist")
+            return None
+        
+        # Check if the subject has a PD image
+        # list all PD images in mpm dir
+        pd_images = [f for f in ls(join(self.pd_images_dir, subject_id, 'Results')) if f.endswith('PD.nii')]
+        if len(pd_images) == 0:
+            self.log_error(subject_id, 'PD image does not exist')
+            print(f"Subject {subject_id} does not have a PD image")
+            return None
+        elif len(pd_images) > 1:
+            self.log_error(subject_id, 'Multiple PD images')
+            print(f"Subject {subject_id} has multiple PD images")
+            return None
+        # otherwise we will have exactly one image -> pd_images[0]
+        if print_count:
+            print(f'Running THN segmentation on {subject_id}, starting at {self.dt.now()}')
+
+        # start timing
+        tstart = self.ptime()
+
+        # run the segmentation
+        # segmentThalamicNuclei.sh bert  [SUBJECTS_DIR]  FILE_ADDITIONAL_SCAN   ANALYSIS_ID
+        process = sp.run(f'export ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS={self.threads}; \
+            segmentThalamicNuclei.sh {subject_id} \
+            {self.subjects_dir} \
+            {join(self.pd_images_dir, subject_id, "Results", pd_images[0])} \
+            {self.analysis_id} \
+            t2', shell=True, capture_output=True)
+        
+        # Above sp.run will suppress the output from the subprocess, capture it and print it if there is an error
+        # If all is well we can access the log file in the subject's directory, but errors may get lost. 
+
+        if process.returncode != 0:
+            self.log_error(subject_id, 'THN Segmentation failed')
+            print(f"Subject {subject_id} THN segmentation failed: {process.stderr.decode('utf-8')}")
+            # Also save it for later
+            with open(f'{subject_id}_thn_seg_err.txt', 'w') as f:
+                f.write(process.stderr.decode('utf-8'))
+                f.close()
+            return None
+        
+        # end time
+        tend = self.ptime()
+        self.timings.append(tend-tstart)
+        print(f'Finished THN segmentation on {subject_id}, it took {(tend-tstart)/60} minutes')
+
+        return None
+
+    def run_thn_list(self, subject_list):
+    
+        "Run for subjects in a given list"
+        
+        if len(subject_list) == 0:
+            raise Exception("No subjects found in subject_list")
+
+        self.subjects = subject_list
+
+        print(f'Running THN segmentation on {len(self.subjects)} subjects')
+        
+        for i, subject in enumerate(self.subjects):
+            
+            # check if sub has been processed before
+            if self.skip_existing:
+                if self.check_exists(subject, 'thn'):
+                    print(f'Subject {subject} has been processed before, skipping')
+                    continue
+            
+            print(f'\nRunning THN segmentation on {subject} ({i+1}/{len(self.subjects)})\n')
+            self.run_hpc_sub(subject, print_count=False)
+
+            # print progress info
+            self.progress_info(i)
+
+        print(f'Finished THN segmentation on {len(self.subjects)} subjects')
+        if self.telegram:
+            self.tgsend(f'Finished THN segmentation on {len(self.subjects)} subjects')
