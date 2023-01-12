@@ -156,7 +156,7 @@ class seg:
                 f.close()
             return None
 
-    def run_segmentation(self, subject_id):
+    def run_subject(self, subject_id):
 
         # Runs a single subject through all specified segmentations
 
@@ -261,3 +261,37 @@ class seg:
         print(f'Finished segmentation on {subject_id}, it took {(tend-tstart)/60} minutes')
 
         return None
+
+    def run_list(self, subject_list):
+        # Runs a list of subjects through all specified segmentations
+
+        if len(subject_list) == 0:
+            raise Exception("No subjects found in subject_list")
+        
+        self.subjects = subject_list
+        print(f'Running HPC/AMG segmentation on {len(self.subjects)} subjects')
+
+        # Main Loop
+        for i, subject in enumerate(self.subjects):
+            # FIXME check if sub has been processed before - need to check for all segs accordingly
+            '''
+            if self.skip_existing:
+                if self.check_exists(subject):
+                    print(f'Subject {subject} has been processed before, skipping')
+                    continue
+            '''
+            self.run_subject(subject)
+
+            # print progress info
+            self.progress_info(i)
+
+        # All done!
+        print(f'Finished THN segmentation on {len(self.subjects)} subjects')
+        if self.telegram:
+            self.tgsend(f'Finished segmentation on {len(self.subjects)} subjects')
+        return None
+
+
+        
+
+    
