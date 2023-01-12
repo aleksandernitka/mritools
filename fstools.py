@@ -269,7 +269,7 @@ class seg:
             raise Exception("No subjects found in subject_list")
         
         self.subjects = subject_list
-        print(f'Running HPC/AMG segmentation on {len(self.subjects)} subjects')
+        print(f'Running segmentation on {len(self.subjects)} subjects')
 
         # Main Loop
         for i, subject in enumerate(self.subjects):
@@ -286,7 +286,7 @@ class seg:
             self.progress_info(i)
 
         # All done!
-        print(f'Finished THN segmentation on {len(self.subjects)} subjects')
+        print(f'Finished segmentation on {len(self.subjects)} subjects')
         if self.telegram:
             self.tgsend(f'Finished segmentation on {len(self.subjects)} subjects')
         return None
